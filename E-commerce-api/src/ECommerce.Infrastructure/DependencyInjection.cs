@@ -1,5 +1,7 @@
 using ECommerce.Application.Common.Interfaces;
+using ECommerce.Application.Payments;
 using ECommerce.Infrastructure.Authentication;
+using ECommerce.Infrastructure.Payments;
 using ECommerce.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,7 +13,8 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
         string? connectionString,
-        JwtSettings jwtSettings)
+        JwtSettings jwtSettings,
+        StripeSettings stripeSettings)
     {
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(connectionString));
@@ -21,6 +24,9 @@ public static class DependencyInjection
         services.AddSingleton(jwtSettings);
         services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+
+        services.AddSingleton(stripeSettings);
+        services.AddScoped<IPaymentService, StripePaymentService>();
 
         return services;
     }

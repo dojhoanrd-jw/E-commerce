@@ -1,0 +1,16 @@
+@if (state() === 'loading') {
+  <p class="muted" style="text-align: center; padding: 4rem;">Confirmando tu pago…</p>
+} @else if (state() === 'success') {
+  <div class="result">
+    <div class="result__icon">✓</div>
+    <h1>¡Pago realizado!</h1>
+    <p>Tu orden fue creada con éxito.</p>
+    <a class="btn-cta" routerLink="/orders">Ver mis compras</a>
+  </div>
+} @else {
+  <div class="result">
+    <h1>No pudimos confirmar el pago</h1>
+    <p>Si se realizó un cargo, vuelve a intentarlo o contáctanos.</p>
+    <a class="btn-cta" routerLink="/cart">Volver al carrito</a>
+  </div>
+}

@@ -1,10 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { CartService } from '@core/services/cart.service';
-import { OrderService } from '@core/services/order.service';
-import { NotificationService } from '@core/services/notification.service';
+import { PaymentService } from '@core/services/payment.service';
 
 @Component({
   selector: 'app-cart',
@@ -15,9 +14,7 @@ import { NotificationService } from '@core/services/notification.service';
 })
 export class CartComponent {
   readonly cart = inject(CartService);
-  private readonly orderService = inject(OrderService);
-  private readonly notification = inject(NotificationService);
-  private readonly router = inject(Router);
+  private readonly payment = inject(PaymentService);
 
   readonly placing = signal(false);
 
@@ -36,11 +33,10 @@ export class CartComponent {
     }
 
     this.placing.set(true);
-    this.orderService.createOrder(items).subscribe({
-      next: () => {
-        this.cart.clear();
-        this.notification.success('¡Compra realizada con éxito!');
-        this.router.navigate(['/orders']);
+    this.payment.createCheckout(items).subscribe({
+      next: (res) => {
+        // Redirect to the Stripe Checkout hosted page
+        window.location.href = res.url;
       },
       error: () => this.placing.set(false)
     });

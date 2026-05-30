@@ -17,8 +17,39 @@ public class OrderService : IOrderService
         _context = context;
     }
 
-    public async Task<OrderDto> CreateAsync(int userId, CreateOrderRequest request, CancellationToken cancellationToken = default)
+    public async Task<OrderDto> CreateAsync(int userId, CreateOrderRequest request, string? stripeSessionId = null, CancellationToken cancellationToken = default)
     {
+        // Idempotency: if this Stripe session already produced an order, return it.
+        if (stripeSessionId is not null)
+        {
+            var existing = await _context.Orders
+                .Where(o => o.StripeSessionId == stripeSessionId)
+                .Include(o => o.Items)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (existing is not null)
+            {
+                return new OrderDto
+                {
+                    Id = existing.Id,
+                    UserId = existing.UserId,
+                    UserName = string.Empty,
+                    CreatedAt = existing.CreatedAt,
+                    Total = existing.Total,
+                    Status = existing.Status,
+                    Items = existing.Items
+                        .Select(i => new OrderItemDto
+                        {
+                            ProductId = i.ProductId,
+                            ProductName = i.ProductName,
+                            UnitPrice = i.UnitPrice,
+                            Quantity = i.Quantity
+                        })
+                        .ToList()
+                };
+            }
+        }
+
         var requested = request.Items
             .GroupBy(i => i.ProductId)
             .ToDictionary(g => g.Key, g => g.Sum(x => x.Quantity));
@@ -32,7 +63,8 @@ public class OrderService : IOrderService
         {
             UserId = userId,
             CreatedAt = DateTime.UtcNow,
-            Status = "Pending"
+            Status = "Pending",
+            StripeSessionId = stripeSessionId
         };
 
         foreach (var (productId, quantity) in requested)

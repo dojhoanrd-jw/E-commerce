@@ -10,7 +10,9 @@ public class Order
 
     public decimal Total { get; set; }
 
-    public string Status { get; set; } = "Paid";
+    public string Status { get; set; } = "Pending";
+
+    public string? StripeSessionId { get; set; }
 
     public List<OrderItem> Items { get; set; } = new();
 }

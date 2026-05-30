@@ -4,6 +4,7 @@ using ECommerce.Api.Handlers;
 using ECommerce.Application;
 using ECommerce.Infrastructure;
 using ECommerce.Infrastructure.Authentication;
+using ECommerce.Infrastructure.Payments;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -68,8 +69,22 @@ builder.Services.AddAuthorization();
 var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
     ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
+// Stripe payment settings (secret key comes from STRIPE_SECRET_KEY)
+var frontendBase = !string.IsNullOrWhiteSpace(frontendUrl)
+    ? frontendUrl.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)[0]
+    : "http://localhost:4200";
+
+var stripeSettings = new StripeSettings
+{
+    SecretKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY")
+        ?? builder.Configuration["Stripe:SecretKey"] ?? string.Empty,
+    Currency = "usd",
+    SuccessUrl = $"{frontendBase}/checkout/success",
+    CancelUrl = $"{frontendBase}/cart"
+};
+
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(connectionString, jwtSettings);
+builder.Services.AddInfrastructure(connectionString, jwtSettings, stripeSettings);
 
 var app = builder.Build();
 

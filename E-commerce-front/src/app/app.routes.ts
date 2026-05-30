@@ -36,6 +36,14 @@ export const routes: Routes = [
       import('@features/profile/components/profile/profile.component').then((m) => m.ProfileComponent)
   },
   {
+    path: 'checkout/success',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('@features/checkout/components/success/checkout-success.component').then(
+        (m) => m.CheckoutSuccessComponent
+      )
+  },
+  {
     path: 'seller',
     canActivate: [roleGuard('Seller', 'Admin')],
     loadChildren: () => import('@features/seller/seller.routes').then((m) => m.SELLER_ROUTES)

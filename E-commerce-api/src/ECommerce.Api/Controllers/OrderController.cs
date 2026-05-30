@@ -21,7 +21,7 @@ public class OrderController : ApiControllerBase
     [HttpPost]
     public async Task<ActionResult<OrderDto>> Create(CreateOrderRequest request, CancellationToken cancellationToken)
     {
-        var order = await _orderService.CreateAsync(CurrentUserId, request, cancellationToken);
+        var order = await _orderService.CreateAsync(CurrentUserId, request, cancellationToken: cancellationToken);
         return Ok(order);
     }
 

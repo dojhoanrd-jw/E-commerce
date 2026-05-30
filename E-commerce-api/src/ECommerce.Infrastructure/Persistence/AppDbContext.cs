@@ -62,6 +62,7 @@ public class AppDbContext : DbContext, IAppDbContext
             entity.Property(e => e.CreatedAt).HasColumnName("created_at");
             entity.Property(e => e.Total).HasPrecision(10, 2).HasColumnName("total");
             entity.Property(e => e.Status).HasMaxLength(20).HasColumnName("status");
+            entity.Property(e => e.StripeSessionId).HasMaxLength(255).HasColumnName("stripe_session_id");
 
             entity.HasMany(e => e.Items)
                 .WithOne()

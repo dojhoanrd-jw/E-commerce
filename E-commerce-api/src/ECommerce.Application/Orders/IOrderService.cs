@@ -4,7 +4,7 @@ namespace ECommerce.Application.Orders;
 
 public interface IOrderService
 {
-    Task<OrderDto> CreateAsync(int userId, CreateOrderRequest request, CancellationToken cancellationToken = default);
+    Task<OrderDto> CreateAsync(int userId, CreateOrderRequest request, string? stripeSessionId = null, CancellationToken cancellationToken = default);
 
     Task<IEnumerable<OrderDto>> GetMyOrdersAsync(int userId, CancellationToken cancellationToken = default);
 

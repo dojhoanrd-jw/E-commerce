@@ -40,7 +40,7 @@
           <strong>{{ cart.total() | currency }}</strong>
         </div>
         <button class="btn" [disabled]="placing()" (click)="checkout()">
-          {{ placing() ? 'Procesando…' : 'Realizar compra' }}
+          {{ placing() ? 'Redirigiendo al pago…' : 'Pagar con tarjeta' }}
         </button>
         <a class="cart__continue" routerLink="/">Seguir comprando</a>
       </aside>
