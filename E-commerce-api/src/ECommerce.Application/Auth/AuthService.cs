@@ -12,18 +12,18 @@ public class AuthService : IAuthService
     private readonly IAppDbContext _context;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
-    private readonly IGoogleTokenValidator _googleTokenValidator;
+    private readonly IFirebaseTokenValidator _firebaseTokenValidator;
 
     public AuthService(
         IAppDbContext context,
         IPasswordHasher passwordHasher,
         IJwtTokenGenerator jwtTokenGenerator,
-        IGoogleTokenValidator googleTokenValidator)
+        IFirebaseTokenValidator firebaseTokenValidator)
     {
         _context = context;
         _passwordHasher = passwordHasher;
         _jwtTokenGenerator = jwtTokenGenerator;
-        _googleTokenValidator = googleTokenValidator;
+        _firebaseTokenValidator = firebaseTokenValidator;
     }
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
@@ -69,17 +69,17 @@ public class AuthService : IAuthService
         return BuildResponse(user);
     }
 
-    public async Task<AuthResponse> GoogleLoginAsync(GoogleLoginRequest request, CancellationToken cancellationToken = default)
+    public async Task<AuthResponse> FirebaseLoginAsync(FirebaseLoginRequest request, CancellationToken cancellationToken = default)
     {
-        var payload = await _googleTokenValidator.ValidateAsync(request.Credential, cancellationToken)
-            ?? throw new UnauthorizedException("Invalid Google credential.");
+        var payload = await _firebaseTokenValidator.ValidateAsync(request.IdToken, cancellationToken)
+            ?? throw new UnauthorizedException("Invalid Firebase credential.");
 
         var email = payload.Email.Trim().ToLowerInvariant();
 
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
         if (user is null)
         {
-            // First time signing in with Google: provision a buyer account with no local password.
+            // First time signing in with a federated provider: provision a buyer account with no local password.
             user = new User
             {
                 Name = string.IsNullOrWhiteSpace(payload.Name) ? email : payload.Name.Trim(),

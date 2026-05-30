@@ -83,15 +83,15 @@ var stripeSettings = new StripeSettings
     CancelUrl = $"{frontendBase}/cart"
 };
 
-// Google sign-in (the OAuth Web Client ID comes from GOOGLE_CLIENT_ID)
-var googleSettings = new GoogleSettings
+// Firebase sign-in (service account JSON comes from FIREBASE_CREDENTIALS)
+var firebaseSettings = new FirebaseSettings
 {
-    ClientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID")
-        ?? builder.Configuration["Google:ClientId"] ?? string.Empty
+    CredentialsJson = Environment.GetEnvironmentVariable("FIREBASE_CREDENTIALS")
+        ?? builder.Configuration["Firebase:CredentialsJson"] ?? string.Empty
 };
 
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(connectionString, jwtSettings, stripeSettings, googleSettings);
+builder.Services.AddInfrastructure(connectionString, jwtSettings, stripeSettings, firebaseSettings);
 
 var app = builder.Build();
 

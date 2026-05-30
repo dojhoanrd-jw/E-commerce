@@ -1,80 +1,47 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  EventEmitter,
-  NgZone,
-  Output,
-  ViewChild,
-  inject
-} from '@angular/core';
-import { environment } from '@environments/environment';
-
-// Google Identity Services is loaded at runtime; it attaches `google` to window.
-declare const google: any;
-
-const GSI_SRC = 'https://accounts.google.com/gsi/client';
-const GSI_ID = 'google-gsi-script';
+import { Component, EventEmitter, Output, inject, signal } from '@angular/core';
+import { FirebaseAuthService } from '@core/services/firebase-auth.service';
+import { NotificationService } from '@core/services/notification.service';
 
 @Component({
   selector: 'app-google-button',
   standalone: true,
   template: `
-    @if (clientId) {
-      <div class="google-btn" #target></div>
+    @if (firebaseAuth.isConfigured) {
+      <button type="button" class="google-btn" [disabled]="loading()" (click)="signIn()">
+        <svg class="google-btn__icon" viewBox="0 0 18 18" aria-hidden="true">
+          <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/>
+          <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/>
+          <path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33z"/>
+          <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/>
+        </svg>
+        <span>{{ loading() ? 'Conectando…' : 'Continuar con Google' }}</span>
+      </button>
     }
   `
 })
-export class GoogleButtonComponent implements AfterViewInit {
-  private readonly zone = inject(NgZone);
+export class GoogleButtonComponent {
+  readonly firebaseAuth = inject(FirebaseAuthService);
+  private readonly notification = inject(NotificationService);
 
-  @ViewChild('target') target?: ElementRef<HTMLElement>;
   @Output() credential = new EventEmitter<string>();
 
-  readonly clientId = environment.googleClientId;
+  readonly loading = signal(false);
 
-  ngAfterViewInit(): void {
-    if (!this.clientId || !this.target) {
-      return;
+  async signIn(): Promise<void> {
+    this.loading.set(true);
+    try {
+      const idToken = await this.firebaseAuth.signInWithGoogle();
+      if (idToken) {
+        this.credential.emit(idToken);
+      }
+    } catch (error: unknown) {
+      const code = (error as { code?: string })?.code ?? '';
+      // The user simply dismissed the popup — not an error worth surfacing.
+      if (code !== 'auth/popup-closed-by-user' && code !== 'auth/cancelled-popup-request') {
+        this.notification.error('No se pudo iniciar sesión con Google.');
+      }
+    } finally {
+      this.loading.set(false);
     }
-
-    this.loadScript().then(() => {
-      google.accounts.id.initialize({
-        client_id: this.clientId,
-        callback: (response: { credential: string }) =>
-          this.zone.run(() => this.credential.emit(response.credential))
-      });
-
-      google.accounts.id.renderButton(this.target!.nativeElement, {
-        theme: 'outline',
-        size: 'large',
-        width: 320,
-        text: 'continue_with',
-        logo_alignment: 'center'
-      });
-    });
-  }
-
-  private loadScript(): Promise<void> {
-    return new Promise((resolve) => {
-      if ((window as any).google?.accounts?.id) {
-        resolve();
-        return;
-      }
-
-      const existing = document.getElementById(GSI_ID) as HTMLScriptElement | null;
-      if (existing) {
-        existing.addEventListener('load', () => resolve());
-        return;
-      }
-
-      const script = document.createElement('script');
-      script.id = GSI_ID;
-      script.src = GSI_SRC;
-      script.async = true;
-      script.defer = true;
-      script.onload = () => resolve();
-      document.head.appendChild(script);
-    });
   }
 }

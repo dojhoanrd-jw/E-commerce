@@ -42,7 +42,7 @@ export class LoginComponent {
 
   googleLogin(credential: string): void {
     this.loading.set(true);
-    this.auth.googleLogin(credential).subscribe({
+    this.auth.firebaseLogin(credential).subscribe({
       next: () => {
         this.notification.success('Bienvenido de nuevo');
         this.router.navigate(['/products']);

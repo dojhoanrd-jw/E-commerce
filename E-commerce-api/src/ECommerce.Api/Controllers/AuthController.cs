@@ -32,11 +32,11 @@ public class AuthController : ApiControllerBase
         return Ok(response);
     }
 
-    // POST: api/auth/google
-    [HttpPost("google")]
-    public async Task<ActionResult<AuthResponse>> GoogleLogin(GoogleLoginRequest request, CancellationToken cancellationToken)
+    // POST: api/auth/firebase
+    [HttpPost("firebase")]
+    public async Task<ActionResult<AuthResponse>> FirebaseLogin(FirebaseLoginRequest request, CancellationToken cancellationToken)
     {
-        var response = await _authService.GoogleLoginAsync(request, cancellationToken);
+        var response = await _authService.FirebaseLoginAsync(request, cancellationToken);
         return Ok(response);
     }
 

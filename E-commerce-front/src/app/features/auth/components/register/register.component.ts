@@ -45,7 +45,7 @@ export class RegisterComponent {
 
   googleLogin(credential: string): void {
     this.loading.set(true);
-    this.auth.googleLogin(credential).subscribe({
+    this.auth.firebaseLogin(credential).subscribe({
       next: () => {
         this.notification.success('Cuenta creada con éxito');
         this.router.navigate(['/products']);

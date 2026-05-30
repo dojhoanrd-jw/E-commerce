@@ -15,7 +15,7 @@ public static class DependencyInjection
         string? connectionString,
         JwtSettings jwtSettings,
         StripeSettings stripeSettings,
-        GoogleSettings googleSettings)
+        FirebaseSettings firebaseSettings)
     {
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(connectionString));
@@ -26,8 +26,9 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
-        services.AddSingleton(googleSettings);
-        services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
+        // Singleton: the underlying FirebaseApp is process-wide and must be created only once.
+        services.AddSingleton(firebaseSettings);
+        services.AddSingleton<IFirebaseTokenValidator, FirebaseTokenValidator>();
 
         services.AddSingleton(stripeSettings);
         services.AddScoped<IPaymentService, StripePaymentService>();

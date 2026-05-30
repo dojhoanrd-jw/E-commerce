@@ -31,9 +31,9 @@ export class AuthService {
       .pipe(tap((response) => this.setSession(response)));
   }
 
-  googleLogin(credential: string): Observable<AuthResponse> {
+  firebaseLogin(idToken: string): Observable<AuthResponse> {
     return this.api
-      .post<AuthResponse>('auth/google', { credential })
+      .post<AuthResponse>('auth/firebase', { idToken })
       .pipe(tap((response) => this.setSession(response)));
   }
 

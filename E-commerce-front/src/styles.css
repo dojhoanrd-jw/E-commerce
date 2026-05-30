@@ -155,8 +155,37 @@ a:hover {
 }
 
 .google-btn {
+  width: 100%;
   display: flex;
+  align-items: center;
   justify-content: center;
+  gap: 0.65rem;
+  padding: 0.7rem 1rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: #3c4043;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.google-btn:hover:not(:disabled) {
+  background: #f7f8f8;
+  box-shadow: var(--shadow-sm);
+}
+
+.google-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.google-btn__icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 /* ===== Form fields ===== */
