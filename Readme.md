@@ -1,134 +1,121 @@
 # 🛒 E-commerce
 
-Plataforma de e-commerce full-stack tipo marketplace (estilo Amazon/eBay) con catálogo, carrito, pagos reales con Stripe, autenticación con roles y panel de vendedor. Construida como proyecto de portafolio con **Angular 19** y **ASP.NET Core 8 (Clean Architecture)** sobre **PostgreSQL**.
-
-🔗 **Demo en vivo:** [tu-proyecto.vercel.app](https://) · **API:** [Render](https://e-commerce-strz.onrender.com)
+A full-stack marketplace-style e-commerce platform (Amazon/eBay style) featuring a product catalog, cart, real Stripe payments, role-based authentication and a seller dashboard. Built as a portfolio project with **Angular 19** and **ASP.NET Core 8 (Clean Architecture)** on top of **PostgreSQL**.
 
 ---
 
-## ✨ Características
+## ✨ Features
 
-**Tienda (comprador)**
-- Catálogo con **búsqueda con autocompletado**, filtros (categoría, precio), ordenamiento y paginación
-- Barra de departamentos y tiles de categorías
-- Detalle de producto con **galería de imágenes**, variantes (talla/color con stock por variante), reseñas y productos relacionados
-- **Carrito** y **lista de deseos** persistentes
-- **Checkout con Stripe** (sesiones de pago, códigos promocionales, dirección de envío)
-- **Vistos recientemente** e historial de pedidos con seguimiento de estado
-- Reseñas con calificación por estrellas
+**Storefront (buyer)**
+- Catalog with **search autocomplete**, filters (category, price), sorting and pagination
+- Departments bar and category tiles
+- Product detail with **image gallery**, variants (size/color with per-variant stock), reviews and related products
+- Persistent **cart** and **wishlist**
+- **Stripe checkout** (payment sessions, promo codes, shipping address)
+- **Recently viewed** and order history with status tracking
+- Star-rating reviews
 
-**Cuenta**
-- Registro e inicio de sesión con **JWT** (3 roles: Admin, Vendedor, Comprador)
-- **Login con Google** vía Firebase Authentication
-- Editar perfil, cambiar contraseña y libreta de direcciones
+**Account**
+- Sign up and sign in with **JWT** (3 roles: Admin, Seller, Buyer)
+- **Google sign-in** via Firebase Authentication
+- Edit profile, change password and address book
 
-**Vendedor / Admin**
-- CRUD de productos (con variantes, imágenes, precio de oferta)
-- **Dashboard de vendedor** con métricas y gráficas (ventas por mes, top productos)
-- Panel de administración
+**Seller / Admin**
+- Product CRUD (with variants, images, sale price)
+- **Seller dashboard** with metrics and charts (sales per month, top products)
+- Admin panel
 
 ---
 
-## 🧱 Stack técnico
+## 🧱 Tech stack
 
-| Capa | Tecnología |
-|------|------------|
+| Layer | Technology |
+|-------|------------|
 | **Frontend** | Angular 19 (standalone components, signals, control flow `@if`/`@for`), TypeScript |
 | **Backend** | ASP.NET Core 8 · Clean Architecture · EF Core 9 |
-| **Base de datos** | PostgreSQL (Neon) |
-| **Autenticación** | JWT + BCrypt · Firebase Admin SDK (Google sign-in) |
-| **Pagos** | Stripe.net (Checkout) |
-| **Despliegue** | Vercel (front) · Render (API) · Neon (DB) |
+| **Database** | PostgreSQL |
+| **Authentication** | JWT + BCrypt · Firebase Admin SDK (Google sign-in) |
+| **Payments** | Stripe.net (Checkout) |
 
 ---
 
-## 📁 Estructura del repositorio
+## 📁 Repository structure
 
 ```
 E-commerce/
-├── E-commerce-front/        # App Angular 19
+├── E-commerce-front/        # Angular 19 app
 │   └── src/app/
-│       ├── core/            # servicios, guards, interceptores, modelos
+│       ├── core/            # services, guards, interceptors, models
 │       ├── features/        # auth, home, products, cart, orders, profile, seller, admin
 │       └── shared/ui/       # header, footer, search-bar, toast, etc.
 │
-├── E-commerce-api/          # API ASP.NET Core 8 (Clean Architecture)
+├── E-commerce-api/          # ASP.NET Core 8 API (Clean Architecture)
 │   └── src/
-│       ├── ECommerce.Domain/          # entidades y enums (sin dependencias)
-│       ├── ECommerce.Application/     # casos de uso, DTOs, interfaces
+│       ├── ECommerce.Domain/          # entities and enums (no dependencies)
+│       ├── ECommerce.Application/     # use cases, DTOs, interfaces
 │       ├── ECommerce.Infrastructure/  # EF Core, Stripe, Firebase, JWT
-│       └── ECommerce.Api/             # controllers, Program.cs, manejo global de errores
+│       └── ECommerce.Api/             # controllers, Program.cs, global error handling
 │
-└── E-commerce-db/           # esquema y scripts SQL (migraciones manuales + seeds)
+└── E-commerce-db/           # schema and SQL scripts (manual migrations + seeds)
 ```
 
-La API sigue **Clean Architecture**: las dependencias apuntan hacia adentro (Domain no depende de nada; Application define interfaces que Infrastructure implementa). Incluye manejo centralizado de errores con `ProblemDetails`, excepciones de dominio (`NotFoundException` → 404, `ConflictException` → 409, etc.) y proyecciones EF para respuestas eficientes.
+The API follows **Clean Architecture**: dependencies point inward (Domain depends on nothing; Application defines interfaces that Infrastructure implements). It includes centralized error handling with `ProblemDetails`, domain exceptions (`NotFoundException` → 404, `ConflictException` → 409, etc.) and EF projections for efficient responses.
 
 ---
 
-## 🚀 Puesta en marcha local
+## 🚀 Getting started locally
 
-### Requisitos
+### Requirements
 - [.NET SDK 8](https://dotnet.microsoft.com/download)
-- [Node.js 18+](https://nodejs.org) y npm
-- Una base de datos PostgreSQL (local o [Neon](https://neon.tech) gratis)
+- [Node.js 18+](https://nodejs.org) and npm
+- A PostgreSQL database
 
-### 1. Base de datos
-Crea la base de datos y aplica los scripts SQL de `E-commerce-db/` en orden (esquema, luego migraciones, luego seeds). Para poblar el catálogo con ~194 productos reales:
+### 1. Database
+Create the database and apply the SQL scripts in `E-commerce-db/` in order (schema, then migrations, then seeds). To populate the catalog with ~194 real products:
 
 ```bash
-# en el SQL editor de Neon, ejecuta el contenido de:
+# in your PostgreSQL client, run the contents of:
 E-commerce-db/seed-dummyjson.sql
 ```
 
 ### 2. Backend
 ```bash
 cd E-commerce-api
-# Variables de entorno (no las subas al repo):
+# Environment variables (never commit them):
 export DATABASE_URL="Host=...;Port=5432;Database=...;Username=...;Password=...;SSL Mode=Require;Trust Server Certificate=true"
-export JWT_KEY="una-clave-secreta-de-al-menos-32-caracteres"
+export JWT_KEY="a-secret-key-at-least-32-characters-long"
 export STRIPE_SECRET_KEY="sk_test_..."
-export FIREBASE_CREDENTIALS='{ ...json del service account... }'   # opcional (login Google)
+export FIREBASE_CREDENTIALS='{ ...service account json... }'   # optional (Google sign-in)
 export FRONTEND_URL="http://localhost:4200"
 
-dotnet run --project src/ECommerce.Api   # API en http://localhost:5134
+dotnet run --project src/ECommerce.Api   # API at http://localhost:5134
 ```
 
 ### 3. Frontend
 ```bash
 cd E-commerce-front
 npm install
-npm start                                 # http://localhost:4200 (proxy /api -> backend)
+npm start                                 # http://localhost:4200 (proxies /api -> backend)
 ```
 
-En desarrollo, el dev-server de Angular hace proxy de `/api` al backend (ver `proxy.conf.json`). La config pública de Firebase va en `src/environments/environment.ts`.
+In development, the Angular dev-server proxies `/api` to the backend (see `proxy.conf.json`). The public Firebase config goes in `src/environments/environment.ts`.
 
 ---
 
-## 🔐 Variables de entorno (backend)
+## 🔐 Environment variables (backend)
 
-| Variable | Descripción |
+| Variable | Description |
 |----------|-------------|
-| `DATABASE_URL` | Cadena de conexión a PostgreSQL (formato Npgsql) |
-| `JWT_KEY` | Clave para firmar los tokens JWT (mín. 32 caracteres) |
-| `STRIPE_SECRET_KEY` | Clave secreta de Stripe (`sk_test_...`) |
-| `FIREBASE_CREDENTIALS` | JSON del service account de Firebase (login con Google) |
-| `FRONTEND_URL` | Origen(es) permitido(s) para CORS y URLs de retorno de Stripe |
+| `DATABASE_URL` | PostgreSQL connection string (Npgsql format) |
+| `JWT_KEY` | Key used to sign JWT tokens (min. 32 characters) |
+| `STRIPE_SECRET_KEY` | Stripe secret key (`sk_test_...`) |
+| `FIREBASE_CREDENTIALS` | Firebase service account JSON (Google sign-in) |
+| `FRONTEND_URL` | Allowed CORS origin(s) and Stripe return URLs |
 
-> ⚠️ Las credenciales son secretas: nunca las subas a Git. En producción van como variables de entorno en Render.
-
----
-
-## ☁️ Despliegue
-
-| Componente | Servicio | Notas |
-|-----------|----------|-------|
-| Frontend | **Vercel** | build de Angular; `environment.prod.ts` apunta a la API de Render |
-| API | **Render** | Docker; variables de entorno configuradas en el dashboard |
-| Base de datos | **Neon** | PostgreSQL serverless |
+> ⚠️ These credentials are secret — never commit them to Git.
 
 ---
 
-## 📜 Licencia
+## 📜 License
 
-Proyecto de portafolio con fines educativos y de demostración.
+Portfolio project for educational and demonstration purposes.
