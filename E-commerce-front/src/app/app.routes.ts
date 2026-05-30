@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from '@core/guards/auth.guard';
+import { roleGuard } from '@core/guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -33,6 +34,16 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () =>
       import('@features/profile/components/profile/profile.component').then((m) => m.ProfileComponent)
+  },
+  {
+    path: 'seller',
+    canActivate: [roleGuard('Seller', 'Admin')],
+    loadChildren: () => import('@features/seller/seller.routes').then((m) => m.SELLER_ROUTES)
+  },
+  {
+    path: 'admin',
+    canActivate: [roleGuard('Admin')],
+    loadChildren: () => import('@features/admin/admin.routes').then((m) => m.ADMIN_ROUTES)
   },
   { path: '**', redirectTo: '' }
 ];

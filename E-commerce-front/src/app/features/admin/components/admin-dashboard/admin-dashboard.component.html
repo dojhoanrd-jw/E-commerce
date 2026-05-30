@@ -1,0 +1,108 @@
+<div class="page">
+  <h1>Panel de administración</h1>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat__value">{{ products().length }}</div>
+      <div class="stat__label">Productos</div>
+    </div>
+    <div class="stat">
+      <div class="stat__value">{{ users().length }}</div>
+      <div class="stat__label">Usuarios</div>
+    </div>
+    <div class="stat">
+      <div class="stat__value">{{ orders().length }}</div>
+      <div class="stat__label">Órdenes</div>
+    </div>
+    <div class="stat">
+      <div class="stat__value">{{ revenue() | currency }}</div>
+      <div class="stat__label">Ingresos</div>
+    </div>
+  </div>
+
+  <h2 class="section-title">Productos</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th>Precio</th>
+        <th>Stock</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (p of products(); track p.id) {
+        <tr>
+          <td class="cell-product">
+            <img [src]="p.imageurl" [alt]="p.name" />
+            <span>{{ p.name }}</span>
+          </td>
+          <td>{{ p.price | currency }}</td>
+          <td>{{ p.stock }}</td>
+          <td class="cell-actions">
+            <a class="link" [routerLink]="['/seller/products', p.id, 'edit']">Editar</a>
+            <button class="link link--danger" (click)="deleteProduct(p)">Eliminar</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <h2 class="section-title">Usuarios</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Correo</th>
+        <th>Rol</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (u of users(); track u.id) {
+        <tr>
+          <td>{{ u.name }}</td>
+          <td>{{ u.email }}</td>
+          <td>
+            <select class="role-select" [value]="u.role" (change)="changeRole(u, $any($event.target).value)">
+              @for (r of roles; track r) {
+                <option [value]="r">{{ r }}</option>
+              }
+            </select>
+          </td>
+          <td class="cell-actions">
+            <button class="link link--danger" (click)="deleteUser(u)">Eliminar</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <h2 class="section-title">Órdenes</h2>
+  @if (orders().length === 0) {
+    <p class="muted">No hay órdenes todavía.</p>
+  } @else {
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Orden</th>
+          <th>Comprador</th>
+          <th>Fecha</th>
+          <th>Artículos</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (o of orders(); track o.id) {
+          <tr>
+            <td>#{{ o.id }}</td>
+            <td>{{ o.userName }}</td>
+            <td>{{ o.createdAt | date: 'short' }}</td>
+            <td>{{ o.items.length }}</td>
+            <td>{{ o.total | currency }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

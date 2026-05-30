@@ -7,6 +7,8 @@ export interface OrderItem {
 
 export interface Order {
   id: number;
+  userId: number;
+  userName: string;
   createdAt: string;
   total: number;
   status: string;

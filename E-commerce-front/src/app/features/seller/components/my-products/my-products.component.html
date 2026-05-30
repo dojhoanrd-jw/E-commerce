@@ -1,0 +1,42 @@
+<div class="page">
+  <div class="page-head">
+    <h1>Mis productos</h1>
+    <a class="btn-cta" routerLink="/seller/products/new">+ Nuevo producto</a>
+  </div>
+
+  @if (loading()) {
+    <p class="muted">Cargando…</p>
+  } @else if (products().length === 0) {
+    <div class="empty">
+      <p>Aún no has publicado productos.</p>
+      <a class="btn-cta" routerLink="/seller/products/new">Publicar el primero</a>
+    </div>
+  } @else {
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Precio</th>
+          <th>Stock</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of products(); track p.id) {
+          <tr>
+            <td class="cell-product">
+              <img [src]="p.imageurl" [alt]="p.name" />
+              <span>{{ p.name }}</span>
+            </td>
+            <td>{{ p.price | currency }}</td>
+            <td>{{ p.stock }}</td>
+            <td class="cell-actions">
+              <a class="link" [routerLink]="['/seller/products', p.id, 'edit']">Editar</a>
+              <button class="link link--danger" (click)="remove(p)">Eliminar</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

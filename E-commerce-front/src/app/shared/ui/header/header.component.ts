@@ -21,6 +21,12 @@ import { CartService } from '@core/services/cart.service';
         @if (auth.isAuthenticated()) {
           <a class="nav-link" routerLink="/orders" routerLinkActive="active">Mis compras</a>
         }
+        @if (canSell()) {
+          <a class="nav-link" routerLink="/seller/products" routerLinkActive="active">Mis productos</a>
+        }
+        @if (isAdmin()) {
+          <a class="nav-link" routerLink="/admin" routerLinkActive="active">Admin</a>
+        }
 
         <a class="cart" routerLink="/cart" routerLinkActive="active" aria-label="Carrito">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -178,6 +184,13 @@ export class HeaderComponent {
       .join('')
       .toUpperCase();
   });
+
+  readonly canSell = computed(() => {
+    const role = this.auth.currentUser()?.role;
+    return role === 'Seller' || role === 'Admin';
+  });
+
+  readonly isAdmin = computed(() => this.auth.currentUser()?.role === 'Admin');
 
   logout(): void {
     this.auth.logout();
