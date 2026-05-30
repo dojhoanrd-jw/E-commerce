@@ -1,5 +1,6 @@
 using ECommerce.Application.Products;
 using ECommerce.Application.Products.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.Api.Controllers;
@@ -8,6 +9,8 @@ namespace ECommerce.Api.Controllers;
 [Route("api/[controller]")]
 public class ProductController : ControllerBase
 {
+    private const string Managers = "Seller,Admin";
+
     private readonly IProductService _productService;
 
     public ProductController(IProductService productService)
@@ -15,7 +18,7 @@ public class ProductController : ControllerBase
         _productService = productService;
     }
 
-    // GET: api/product
+    // GET: api/product  (public)
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts(CancellationToken cancellationToken)
     {
@@ -23,7 +26,7 @@ public class ProductController : ControllerBase
         return Ok(products);
     }
 
-    // GET: api/product/5
+    // GET: api/product/5  (public)
     [HttpGet("{id:int}")]
     public async Task<ActionResult<ProductDto>> GetProduct(int id, CancellationToken cancellationToken)
     {
@@ -31,7 +34,8 @@ public class ProductController : ControllerBase
         return Ok(product);
     }
 
-    // POST: api/product
+    // POST: api/product  (Seller or Admin)
+    [Authorize(Roles = Managers)]
     [HttpPost]
     public async Task<ActionResult<ProductDto>> CreateProduct(CreateProductDto dto, CancellationToken cancellationToken)
     {
@@ -39,7 +43,8 @@ public class ProductController : ControllerBase
         return CreatedAtAction(nameof(GetProduct), new { id = created.Id }, created);
     }
 
-    // PUT: api/product/5
+    // PUT: api/product/5  (Seller or Admin)
+    [Authorize(Roles = Managers)]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateProduct(int id, UpdateProductDto dto, CancellationToken cancellationToken)
     {
@@ -47,7 +52,8 @@ public class ProductController : ControllerBase
         return NoContent();
     }
 
-    // DELETE: api/product/5
+    // DELETE: api/product/5  (Seller or Admin)
+    [Authorize(Roles = Managers)]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteProduct(int id, CancellationToken cancellationToken)
     {
