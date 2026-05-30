@@ -1,3 +1,4 @@
+using ECommerce.Application.Addresses;
 using ECommerce.Application.Auth;
 using ECommerce.Application.Orders;
 using ECommerce.Application.Products;
@@ -18,6 +19,7 @@ public static class DependencyInjection
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IReviewService, ReviewService>();
         services.AddScoped<ISellerService, SellerService>();
+        services.AddScoped<IAddressService, AddressService>();
         return services;
     }
 }

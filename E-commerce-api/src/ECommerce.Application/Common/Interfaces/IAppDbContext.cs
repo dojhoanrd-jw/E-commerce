@@ -17,5 +17,7 @@ public interface IAppDbContext
 
     DbSet<Review> Reviews { get; }
 
+    DbSet<Address> Addresses { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

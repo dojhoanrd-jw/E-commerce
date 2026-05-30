@@ -66,6 +66,32 @@ public class AuthService : IAuthService
         return BuildResponse(user);
     }
 
+    public async Task<AuthResponse> UpdateProfileAsync(int userId, UpdateProfileRequest request, CancellationToken cancellationToken = default)
+    {
+        var user = await _context.Users.FindAsync([userId], cancellationToken)
+            ?? throw new NotFoundException(nameof(User), userId);
+
+        user.Name = request.Name.Trim();
+        await _context.SaveChangesAsync(cancellationToken);
+
+        // Re-issue the token so the new name is reflected in the session.
+        return BuildResponse(user);
+    }
+
+    public async Task ChangePasswordAsync(int userId, ChangePasswordRequest request, CancellationToken cancellationToken = default)
+    {
+        var user = await _context.Users.FindAsync([userId], cancellationToken)
+            ?? throw new NotFoundException(nameof(User), userId);
+
+        if (!_passwordHasher.Verify(request.CurrentPassword, user.PasswordHash))
+        {
+            throw new UnauthorizedException("Current password is incorrect.");
+        }
+
+        user.PasswordHash = _passwordHasher.Hash(request.NewPassword);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
     private AuthResponse BuildResponse(User user) => new()
     {
         Token = _jwtTokenGenerator.GenerateToken(user),

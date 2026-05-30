@@ -23,6 +23,8 @@ public class AppDbContext : DbContext, IAppDbContext
 
     public DbSet<Review> Reviews => Set<Review>();
 
+    public DbSet<Address> Addresses => Set<Address>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Product>(entity =>
@@ -121,6 +123,23 @@ public class AppDbContext : DbContext, IAppDbContext
             entity.Property(e => e.Rating).HasColumnName("rating");
             entity.Property(e => e.Comment).HasColumnName("comment");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+        });
+
+        modelBuilder.Entity<Address>(entity =>
+        {
+            entity.ToTable("addresses");
+            entity.HasKey(e => e.Id).HasName("addresses_pkey");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.Label).HasMaxLength(60).HasColumnName("label");
+            entity.Property(e => e.Recipient).HasMaxLength(255).HasColumnName("recipient");
+            entity.Property(e => e.Line1).HasMaxLength(255).HasColumnName("line1");
+            entity.Property(e => e.City).HasMaxLength(120).HasColumnName("city");
+            entity.Property(e => e.State).HasMaxLength(120).HasColumnName("state");
+            entity.Property(e => e.Zip).HasMaxLength(30).HasColumnName("zip");
+            entity.Property(e => e.Country).HasMaxLength(80).HasColumnName("country");
+            entity.Property(e => e.Phone).HasMaxLength(40).HasColumnName("phone");
         });
 
         base.OnModelCreating(modelBuilder);
