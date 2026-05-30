@@ -8,9 +8,11 @@ public interface IProductService
 
     Task<ProductDto> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 
-    Task<ProductDto> CreateAsync(CreateProductDto dto, CancellationToken cancellationToken = default);
+    Task<IEnumerable<ProductDto>> GetBySellerAsync(int sellerId, CancellationToken cancellationToken = default);
 
-    Task UpdateAsync(int id, UpdateProductDto dto, CancellationToken cancellationToken = default);
+    Task<ProductDto> CreateAsync(CreateProductDto dto, int sellerId, CancellationToken cancellationToken = default);
 
-    Task DeleteAsync(int id, CancellationToken cancellationToken = default);
+    Task UpdateAsync(int id, UpdateProductDto dto, int userId, bool isAdmin, CancellationToken cancellationToken = default);
+
+    Task DeleteAsync(int id, int userId, bool isAdmin, CancellationToken cancellationToken = default);
 }

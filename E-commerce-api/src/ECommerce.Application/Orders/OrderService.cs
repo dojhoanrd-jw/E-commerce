@@ -17,7 +17,6 @@ public class OrderService : IOrderService
 
     public async Task<OrderDto> CreateAsync(int userId, CreateOrderRequest request, CancellationToken cancellationToken = default)
     {
-        // Merge duplicate product ids into a single quantity.
         var requested = request.Items
             .GroupBy(i => i.ProductId)
             .ToDictionary(g => g.Key, g => g.Sum(x => x.Quantity));
@@ -61,34 +60,61 @@ public class OrderService : IOrderService
         _context.Orders.Add(order);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return MapToDto(order);
+        return new OrderDto
+        {
+            Id = order.Id,
+            UserId = order.UserId,
+            UserName = string.Empty,
+            CreatedAt = order.CreatedAt,
+            Total = order.Total,
+            Status = order.Status,
+            Items = order.Items
+                .Select(i => new OrderItemDto
+                {
+                    ProductId = i.ProductId,
+                    ProductName = i.ProductName,
+                    UnitPrice = i.UnitPrice,
+                    Quantity = i.Quantity
+                })
+                .ToList()
+        };
     }
 
-    public async Task<IEnumerable<OrderDto>> GetMyOrdersAsync(int userId, CancellationToken cancellationToken = default)
+    public Task<IEnumerable<OrderDto>> GetMyOrdersAsync(int userId, CancellationToken cancellationToken = default)
     {
-        var orders = await _context.Orders
-            .Where(o => o.UserId == userId)
-            .Include(o => o.Items)
+        return QueryToDtoAsync(_context.Orders.Where(o => o.UserId == userId), cancellationToken);
+    }
+
+    public Task<IEnumerable<OrderDto>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return QueryToDtoAsync(_context.Orders, cancellationToken);
+    }
+
+    private async Task<IEnumerable<OrderDto>> QueryToDtoAsync(IQueryable<Order> query, CancellationToken cancellationToken)
+    {
+        return await query
             .OrderByDescending(o => o.CreatedAt)
-            .ToListAsync(cancellationToken);
-
-        return orders.Select(MapToDto).ToList();
-    }
-
-    private static OrderDto MapToDto(Order order) => new()
-    {
-        Id = order.Id,
-        CreatedAt = order.CreatedAt,
-        Total = order.Total,
-        Status = order.Status,
-        Items = order.Items
-            .Select(i => new OrderItemDto
+            .Select(o => new OrderDto
             {
-                ProductId = i.ProductId,
-                ProductName = i.ProductName,
-                UnitPrice = i.UnitPrice,
-                Quantity = i.Quantity
+                Id = o.Id,
+                UserId = o.UserId,
+                UserName = _context.Users
+                    .Where(u => u.Id == o.UserId)
+                    .Select(u => u.Name)
+                    .FirstOrDefault() ?? string.Empty,
+                CreatedAt = o.CreatedAt,
+                Total = o.Total,
+                Status = o.Status,
+                Items = o.Items
+                    .Select(i => new OrderItemDto
+                    {
+                        ProductId = i.ProductId,
+                        ProductName = i.ProductName,
+                        UnitPrice = i.UnitPrice,
+                        Quantity = i.Quantity
+                    })
+                    .ToList()
             })
-            .ToList()
-    };
+            .ToListAsync(cancellationToken);
+    }
 }

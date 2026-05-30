@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using ECommerce.Application.Orders;
 using ECommerce.Application.Orders.Dtos;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +8,7 @@ namespace ECommerce.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class OrderController : ControllerBase
+public class OrderController : ApiControllerBase
 {
     private readonly IOrderService _orderService;
 
@@ -18,7 +17,7 @@ public class OrderController : ControllerBase
         _orderService = orderService;
     }
 
-    // POST: api/order
+    // POST: api/order  (any authenticated user)
     [HttpPost]
     public async Task<ActionResult<OrderDto>> Create(CreateOrderRequest request, CancellationToken cancellationToken)
     {
@@ -26,7 +25,7 @@ public class OrderController : ControllerBase
         return Ok(order);
     }
 
-    // GET: api/order/mine
+    // GET: api/order/mine  (the caller's own orders)
     [HttpGet("mine")]
     public async Task<ActionResult<IEnumerable<OrderDto>>> GetMine(CancellationToken cancellationToken)
     {
@@ -34,9 +33,12 @@ public class OrderController : ControllerBase
         return Ok(orders);
     }
 
-    private int CurrentUserId =>
-        int.Parse(
-            User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? User.FindFirstValue("sub")
-            ?? throw new InvalidOperationException("Missing user id claim."));
+    // GET: api/order  (Admin only) — all orders
+    [Authorize(Roles = "Admin")]
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<OrderDto>>> GetAll(CancellationToken cancellationToken)
+    {
+        var orders = await _orderService.GetAllAsync(cancellationToken);
+        return Ok(orders);
+    }
 }

@@ -25,7 +25,8 @@ public class ProductService : IProductService
                 Description = p.Description,
                 Stock = p.Stock,
                 Price = p.Price,
-                Imageurl = p.Imageurl
+                Imageurl = p.Imageurl,
+                SellerId = p.SellerId
             })
             .ToListAsync(cancellationToken);
     }
@@ -36,7 +37,24 @@ public class ProductService : IProductService
         return MapToDto(product);
     }
 
-    public async Task<ProductDto> CreateAsync(CreateProductDto dto, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<ProductDto>> GetBySellerAsync(int sellerId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Products
+            .Where(p => p.SellerId == sellerId)
+            .Select(p => new ProductDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Stock = p.Stock,
+                Price = p.Price,
+                Imageurl = p.Imageurl,
+                SellerId = p.SellerId
+            })
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<ProductDto> CreateAsync(CreateProductDto dto, int sellerId, CancellationToken cancellationToken = default)
     {
         var product = new Product
         {
@@ -44,7 +62,8 @@ public class ProductService : IProductService
             Description = dto.Description,
             Stock = dto.Stock,
             Price = dto.Price,
-            Imageurl = dto.Imageurl
+            Imageurl = dto.Imageurl,
+            SellerId = sellerId
         };
 
         _context.Products.Add(product);
@@ -53,9 +72,10 @@ public class ProductService : IProductService
         return MapToDto(product);
     }
 
-    public async Task UpdateAsync(int id, UpdateProductDto dto, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(int id, UpdateProductDto dto, int userId, bool isAdmin, CancellationToken cancellationToken = default)
     {
         var product = await FindOrThrowAsync(id, cancellationToken);
+        EnsureCanManage(product, userId, isAdmin);
 
         product.Name = dto.Name;
         product.Description = dto.Description;
@@ -66,9 +86,10 @@ public class ProductService : IProductService
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(int id, int userId, bool isAdmin, CancellationToken cancellationToken = default)
     {
         var product = await FindOrThrowAsync(id, cancellationToken);
+        EnsureCanManage(product, userId, isAdmin);
 
         _context.Products.Remove(product);
         await _context.SaveChangesAsync(cancellationToken);
@@ -80,6 +101,14 @@ public class ProductService : IProductService
         return product ?? throw new NotFoundException(nameof(Product), id);
     }
 
+    private static void EnsureCanManage(Product product, int userId, bool isAdmin)
+    {
+        if (!isAdmin && product.SellerId != userId)
+        {
+            throw new ForbiddenException("You can only manage your own products.");
+        }
+    }
+
     private static ProductDto MapToDto(Product p) => new()
     {
         Id = p.Id,
@@ -87,6 +116,7 @@ public class ProductService : IProductService
         Description = p.Description,
         Stock = p.Stock,
         Price = p.Price,
-        Imageurl = p.Imageurl
+        Imageurl = p.Imageurl,
+        SellerId = p.SellerId
     };
 }

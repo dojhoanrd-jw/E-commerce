@@ -1,6 +1,7 @@
 using ECommerce.Application.Auth;
 using ECommerce.Application.Orders;
 using ECommerce.Application.Products;
+using ECommerce.Application.Users;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ECommerce.Application;
@@ -12,6 +13,7 @@ public static class DependencyInjection
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<IUserService, UserService>();
         return services;
     }
 }

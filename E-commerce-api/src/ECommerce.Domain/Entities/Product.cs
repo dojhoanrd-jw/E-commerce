@@ -13,4 +13,6 @@ public class Product
     public decimal Price { get; set; }
 
     public string? Imageurl { get; set; }
+
+    public int? SellerId { get; set; }
 }

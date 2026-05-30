@@ -32,6 +32,7 @@ public class AppDbContext : DbContext, IAppDbContext
             entity.Property(e => e.Stock).HasDefaultValue(0).HasColumnName("stock");
             entity.Property(e => e.Price).HasPrecision(10, 2).HasColumnName("price");
             entity.Property(e => e.Imageurl).HasColumnName("imageurl");
+            entity.Property(e => e.SellerId).HasColumnName("seller_id");
         });
 
         modelBuilder.Entity<User>(entity =>
