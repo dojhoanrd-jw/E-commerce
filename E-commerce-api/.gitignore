@@ -1,0 +1,19 @@
+## .NET build output
+bin/
+obj/
+out/
+
+## Visual Studio / Rider IDE files
+.vs/
+.idea/
+*.user
+*.suo
+*.userprefs
+
+## ASP.NET local secrets / env
+*.local.json
+secrets.json
+
+## Logs and temp
+*.log
+*.tmp
