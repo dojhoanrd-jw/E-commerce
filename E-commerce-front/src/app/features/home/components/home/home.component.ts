@@ -1,7 +1,8 @@
 import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ProductsService } from '@features/products/services/products.service';
 import { Product, PRODUCT_CATEGORIES, effectivePrice } from '@features/products/models/product.model';
 import { CartService } from '@core/services/cart.service';
@@ -23,6 +24,7 @@ export class HomeComponent implements OnInit {
   readonly recentlyViewed = inject(RecentlyViewedService);
   private readonly notification = inject(NotificationService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly categories = PRODUCT_CATEGORIES;
   readonly allProducts = signal<Product[]>([]);
@@ -88,6 +90,11 @@ export class HomeComponent implements OnInit {
       },
       { allowSignalWrites: true }
     );
+
+    // Keep the search box in sync with the ?q= query param (set by the header search bar).
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+      this.search.set(params.get('q') ?? '');
+    });
   }
 
   goToPage(p: number): void {

@@ -3,16 +3,19 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 import { CartService } from '@core/services/cart.service';
 import { WishlistService } from '@core/services/wishlist.service';
+import { SearchBarComponent } from '@shared/ui/search-bar/search-bar.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, SearchBarComponent],
   template: `
     <header class="app-header">
       <a class="brand" routerLink="/">
         <span class="brand__dot">●</span> E-commerce
       </a>
+
+      <app-search-bar />
 
       <nav class="nav">
         <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">

@@ -20,6 +20,34 @@ public class ProductService : IProductService
         return await _context.Products.Select(Projection()).ToListAsync(cancellationToken);
     }
 
+    public async Task<IEnumerable<ProductSuggestionDto>> SearchAsync(string term, int limit, CancellationToken cancellationToken = default)
+    {
+        term = (term ?? string.Empty).Trim();
+        if (term.Length == 0)
+        {
+            return Array.Empty<ProductSuggestionDto>();
+        }
+
+        var lower = term.ToLowerInvariant();
+
+        return await _context.Products
+            .Where(p => p.Name.ToLower().Contains(lower) || p.Category.ToLower().Contains(lower))
+            // Name matches that start with the term are the most relevant.
+            .OrderByDescending(p => p.Name.ToLower().StartsWith(lower))
+            .ThenBy(p => p.Name)
+            .Take(limit)
+            .Select(p => new ProductSuggestionDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Imageurl = p.Imageurl,
+                Category = p.Category,
+                Price = p.Price,
+                SalePrice = p.SalePrice
+            })
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IEnumerable<ProductDto>> GetBySellerAsync(int sellerId, CancellationToken cancellationToken = default)
     {
         return await _context.Products

@@ -37,6 +37,15 @@ export interface Product {
   variants: Variant[];
 }
 
+export interface ProductSuggestion {
+  id: number;
+  name: string;
+  imageurl: string;
+  category: string;
+  price: number;
+  salePrice?: number | null;
+}
+
 export interface ProductPayload {
   name: string;
   description: string;

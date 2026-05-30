@@ -26,6 +26,17 @@ public class ProductController : ApiControllerBase
         return Ok(products);
     }
 
+    // GET: api/product/search?q=term&limit=6  (public) — autocomplete suggestions
+    [HttpGet("search")]
+    public async Task<ActionResult<IEnumerable<ProductSuggestionDto>>> Search(
+        [FromQuery] string? q,
+        [FromQuery] int limit = 6,
+        CancellationToken cancellationToken = default)
+    {
+        var results = await _productService.SearchAsync(q ?? string.Empty, Math.Clamp(limit, 1, 20), cancellationToken);
+        return Ok(results);
+    }
+
     // GET: api/product/mine  (Seller or Admin) — the caller's own products
     [Authorize(Roles = Managers)]
     [HttpGet("mine")]

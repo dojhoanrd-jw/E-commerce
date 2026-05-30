@@ -6,6 +6,8 @@ public interface IProductService
 {
     Task<IEnumerable<ProductDto>> GetAllAsync(CancellationToken cancellationToken = default);
 
+    Task<IEnumerable<ProductSuggestionDto>> SearchAsync(string term, int limit, CancellationToken cancellationToken = default);
+
     Task<ProductDto> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 
     Task<IEnumerable<ProductDto>> GetBySellerAsync(int sellerId, CancellationToken cancellationToken = default);

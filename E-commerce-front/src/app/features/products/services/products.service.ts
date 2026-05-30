@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '@core/services/api.service';
-import { Product, ProductPayload } from '@features/products/models/product.model';
+import { Product, ProductPayload, ProductSuggestion } from '@features/products/models/product.model';
 
 @Injectable({ providedIn: 'root' })
 export class ProductsService {
@@ -13,6 +13,10 @@ export class ProductsService {
 
   getById(id: number): Observable<Product> {
     return this.api.get<Product>(`product/${id}`);
+  }
+
+  search(term: string, limit = 6): Observable<ProductSuggestion[]> {
+    return this.api.get<ProductSuggestion[]>(`product/search?q=${encodeURIComponent(term)}&limit=${limit}`);
   }
 
   getMine(): Observable<Product[]> {
