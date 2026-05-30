@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ProductsService } from '../../services/products.service';
-import { Product } from '../../interfaces/product.interface';
+import { ProductsService } from '@features/products/services/products.service';
+import { Product } from '@features/products/models/product.model';
 
 @Component({
   selector: 'app-products',
