@@ -31,6 +31,16 @@ export class AuthService {
       .pipe(tap((response) => this.setSession(response)));
   }
 
+  updateProfile(name: string): Observable<AuthResponse> {
+    return this.api
+      .put<AuthResponse>('auth/profile', { name })
+      .pipe(tap((response) => this.setSession(response)));
+  }
+
+  changePassword(currentPassword: string, newPassword: string): Observable<void> {
+    return this.api.post<void>('auth/change-password', { currentPassword, newPassword });
+  }
+
   logout(): void {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
