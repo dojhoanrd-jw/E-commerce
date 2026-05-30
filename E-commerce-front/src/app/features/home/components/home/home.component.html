@@ -2,98 +2,136 @@
   <div class="hero__content">
     <span class="hero__eyebrow">Tienda online</span>
     <h1>Todo lo que necesitas, en <span>ShopHub</span></h1>
-    <p>Tecnología, gadgets y más — con los mejores precios y envío rápido.</p>
+    <p>Tecnología, hogar, ropa y más — con los mejores precios y envío rápido.</p>
     <a class="hero__cta" href="#catalogo">Explorar productos</a>
   </div>
 </section>
 
-<section class="catalog" id="catalogo">
-  <div class="catalog__head">
-    <h2>Nuestros productos</h2>
-    @if (!loading()) {
-      <span class="catalog__count">{{ filtered().length }} productos</span>
+<div class="container">
+  <div class="chips">
+    <button class="chip" [class.chip--active]="category() === ''" (click)="category.set('')">Todo</button>
+    @for (c of categories; track c) {
+      <button class="chip" [class.chip--active]="category() === c" (click)="category.set(c)">{{ c }}</button>
     }
   </div>
 
-  <div class="filters">
-    <input
-      class="filters__search"
-      type="text"
-      placeholder="Buscar por nombre…"
-      [ngModel]="search()"
-      (ngModelChange)="search.set($event)"
-    />
-    <select [ngModel]="category()" (ngModelChange)="category.set($event)">
-      <option value="">Todas las categorías</option>
-      @for (c of categories; track c) {
-        <option [value]="c">{{ c }}</option>
-      }
-    </select>
-    <input
-      class="filters__price"
-      type="number"
-      min="0"
-      placeholder="Precio máx."
-      [ngModel]="maxPrice()"
-      (ngModelChange)="maxPrice.set($event)"
-    />
-    <select [ngModel]="sort()" (ngModelChange)="sort.set($event)">
-      <option value="relevance">Ordenar por…</option>
-      <option value="price-asc">Precio: menor a mayor</option>
-      <option value="price-desc">Precio: mayor a menor</option>
-      <option value="rating">Mejor calificados</option>
-      <option value="sales">Más vendidos</option>
-    </select>
-    <button class="filters__clear" type="button" (click)="clearFilters()">Limpiar</button>
-  </div>
-
-  @if (loading()) {
-    <p class="muted">Cargando productos…</p>
-  } @else if (filtered().length === 0) {
-    <p class="muted">No se encontraron productos.</p>
-  } @else {
-    <div class="products-grid">
-      @for (product of filtered(); track product.id) {
-        <article class="product-card">
-          <button
-            class="wish-btn"
-            [class.wish-btn--active]="wishlist.has(product.id)"
-            (click)="toggleWishlist(product, $event)"
-            aria-label="Favorito"
-          >♥</button>
-          <a class="product-card__link" [routerLink]="['/products', product.id]">
-            <div class="image-container">
-              @if (hasDiscount(product)) {
-                <span class="sale-badge">-{{ discountPercent(product) }}%</span>
-              }
-              <img [src]="product.imageurl" [alt]="product.name" class="product-image" />
-            </div>
-            <div class="product-info">
-              <span class="product-cat">{{ product.category }}</span>
-              <h3 class="product-name">{{ product.name }}</h3>
-              @if (product.reviewCount > 0) {
-                <div class="card-rating">
-                  <span class="stars">{{ stars(product.averageRating) }}</span>
-                  <span>({{ product.reviewCount }})</span>
-                </div>
-              }
-              <p class="product-description">{{ product.description }}</p>
-              <div class="product-details">
-                <span class="price">
-                  {{ effective(product) | currency }}
-                  @if (hasDiscount(product)) {
-                    <span class="price-old">{{ product.price | currency }}</span>
-                  }
-                </span>
-                <span class="stock">Stock: {{ product.stock }}</span>
-              </div>
-            </div>
+  @if (deals().length > 0) {
+    <section class="deals">
+      <h2 class="deals__title">🔥 Ofertas del día</h2>
+      <div class="deals__row">
+        @for (product of deals(); track product.id) {
+          <a class="deal-card" [routerLink]="['/products', product.id]">
+            <span class="sale-badge">-{{ discountPercent(product) }}%</span>
+            <img [src]="product.imageurl" [alt]="product.name" />
+            <span class="deal-card__name">{{ product.name }}</span>
+            <span class="deal-card__price">
+              {{ effective(product) | currency }}
+              <span class="price-old">{{ product.price | currency }}</span>
+            </span>
           </a>
-          <button class="btn add-btn" [disabled]="product.stock === 0" (click)="addToCart(product, $event)">
-            {{ product.stock === 0 ? 'Agotado' : 'Agregar al carrito' }}
-          </button>
-        </article>
+        }
+      </div>
+    </section>
+  }
+
+  <div class="shop" id="catalogo">
+    <aside class="sidebar">
+      <h3>Filtros</h3>
+
+      <div class="sidebar__group">
+        <label>Buscar</label>
+        <input type="text" placeholder="Buscar…" [ngModel]="search()" (ngModelChange)="search.set($event)" />
+      </div>
+
+      <div class="sidebar__group">
+        <label>Categoría</label>
+        <ul class="cat-list">
+          <li>
+            <button [class.active]="category() === ''" (click)="category.set('')">Todas</button>
+          </li>
+          @for (c of categories; track c) {
+            <li>
+              <button [class.active]="category() === c" (click)="category.set(c)">{{ c }}</button>
+            </li>
+          }
+        </ul>
+      </div>
+
+      <div class="sidebar__group">
+        <label>Precio máximo</label>
+        <input type="number" min="0" placeholder="$" [ngModel]="maxPrice()" (ngModelChange)="maxPrice.set($event)" />
+      </div>
+
+      <div class="sidebar__group">
+        <label>Ordenar por</label>
+        <select [ngModel]="sort()" (ngModelChange)="sort.set($event)">
+          <option value="relevance">Relevancia</option>
+          <option value="price-asc">Precio: menor a mayor</option>
+          <option value="price-desc">Precio: mayor a menor</option>
+          <option value="rating">Mejor calificados</option>
+          <option value="sales">Más vendidos</option>
+        </select>
+      </div>
+
+      <button class="filters__clear" type="button" (click)="clearFilters()">Limpiar filtros</button>
+    </aside>
+
+    <div class="catalog-main">
+      <div class="catalog__head">
+        <h2>{{ category() || 'Todos los productos' }}</h2>
+        @if (!loading()) {
+          <span class="catalog__count">{{ filtered().length }} resultados</span>
+        }
+      </div>
+
+      @if (loading()) {
+        <p class="muted">Cargando productos…</p>
+      } @else if (filtered().length === 0) {
+        <p class="muted">No se encontraron productos.</p>
+      } @else {
+        <div class="products-grid">
+          @for (product of filtered(); track product.id) {
+            <article class="product-card">
+              <button
+                class="wish-btn"
+                [class.wish-btn--active]="wishlist.has(product.id)"
+                (click)="toggleWishlist(product, $event)"
+                aria-label="Favorito"
+              >♥</button>
+              <a class="product-card__link" [routerLink]="['/products', product.id]">
+                <div class="image-container">
+                  @if (hasDiscount(product)) {
+                    <span class="sale-badge">-{{ discountPercent(product) }}%</span>
+                  }
+                  <img [src]="product.imageurl" [alt]="product.name" class="product-image" />
+                </div>
+                <div class="product-info">
+                  <span class="product-cat">{{ product.category }}</span>
+                  <h3 class="product-name">{{ product.name }}</h3>
+                  @if (product.reviewCount > 0) {
+                    <div class="card-rating">
+                      <span class="stars">{{ stars(product.averageRating) }}</span>
+                      <span>({{ product.reviewCount }})</span>
+                    </div>
+                  }
+                  <div class="product-details">
+                    <span class="price">
+                      {{ effective(product) | currency }}
+                      @if (hasDiscount(product)) {
+                        <span class="price-old">{{ product.price | currency }}</span>
+                      }
+                    </span>
+                    <span class="stock">Stock: {{ product.stock }}</span>
+                  </div>
+                </div>
+              </a>
+              <button class="btn add-btn" [disabled]="product.stock === 0" (click)="addToCart(product, $event)">
+                {{ product.stock === 0 ? 'Agotado' : 'Agregar al carrito' }}
+              </button>
+            </article>
+          }
+        </div>
       }
     </div>
-  }
-</section>
+  </div>
+</div>

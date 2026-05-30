@@ -62,6 +62,8 @@ export class HomeComponent implements OnInit {
     }
   });
 
+  readonly deals = computed(() => this.allProducts().filter((p) => this.hasDiscount(p)).slice(0, 8));
+
   ngOnInit(): void {
     this.productsService.getProduct().subscribe({
       next: (data) => {
