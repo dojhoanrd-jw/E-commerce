@@ -1,7 +1,10 @@
 <div class="page">
   <div class="page-head">
     <h1>Mis productos</h1>
-    <a class="btn-cta" routerLink="/seller/products/new">+ Nuevo producto</a>
+    <div style="display: flex; gap: 0.75rem; align-items: center;">
+      <a class="link" routerLink="/seller/dashboard">📊 Ver mis ventas</a>
+      <a class="btn-cta" routerLink="/seller/products/new">+ Nuevo producto</a>
+    </div>
   </div>
 
   @if (loading()) {

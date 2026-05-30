@@ -7,11 +7,12 @@ import { Product } from '@features/products/models/product.model';
 import { Order } from '@core/models/order.model';
 import { NotificationService } from '@core/services/notification.service';
 import { UserRole } from '@core/models/auth.model';
+import { BarChartComponent, BarDatum } from '@shared/ui/bar-chart/bar-chart.component';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, BarChartComponent],
   templateUrl: './admin-dashboard.component.html'
 })
 export class AdminDashboardComponent implements OnInit {
@@ -26,6 +27,30 @@ export class AdminDashboardComponent implements OnInit {
   readonly revenue = computed(() => this.orders().reduce((sum, o) => sum + o.total, 0));
   readonly roles: UserRole[] = ['Buyer', 'Seller', 'Admin'];
   readonly orderStatuses = ['Pending', 'Shipped', 'Delivered', 'Cancelled'];
+
+  readonly salesByMonth = computed<BarDatum[]>(() => {
+    const map = new Map<string, number>();
+    for (const o of this.orders()) {
+      const month = o.createdAt.slice(0, 7);
+      map.set(month, (map.get(month) ?? 0) + o.total);
+    }
+    return [...map.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([label, value]) => ({ label, value }));
+  });
+
+  readonly topProducts = computed<BarDatum[]>(() => {
+    const map = new Map<string, number>();
+    for (const o of this.orders()) {
+      for (const item of o.items) {
+        map.set(item.productName, (map.get(item.productName) ?? 0) + item.quantity);
+      }
+    }
+    return [...map.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([label, value]) => ({ label, value }));
+  });
 
   ngOnInit(): void {
     this.productsService.getProduct().subscribe({ next: (d) => this.products.set(d) });
