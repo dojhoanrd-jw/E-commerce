@@ -33,6 +33,8 @@
             <span>Total</span>
             <strong>{{ order.total | currency }}</strong>
           </div>
+
+          <a class="order-detail-link" [routerLink]="['/orders', order.id]">Ver detalle y seguimiento →</a>
         </article>
       }
     </div>

@@ -89,6 +89,7 @@
 }
 
 .product-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   background: var(--color-surface);
@@ -96,6 +97,33 @@
   border-radius: var(--radius);
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wish-btn {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow-sm);
+  color: #c7c2bb;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s ease, transform 0.1s ease;
+}
+
+.wish-btn:hover {
+  transform: scale(1.1);
+  color: var(--color-accent);
+}
+
+.wish-btn--active {
+  color: var(--color-accent);
 }
 
 .product-card:hover {

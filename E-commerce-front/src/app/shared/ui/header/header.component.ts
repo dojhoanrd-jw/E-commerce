@@ -2,6 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 import { CartService } from '@core/services/cart.service';
+import { WishlistService } from '@core/services/wishlist.service';
 
 @Component({
   selector: 'app-header',
@@ -27,6 +28,13 @@ import { CartService } from '@core/services/cart.service';
         @if (isAdmin()) {
           <a class="nav-link" routerLink="/admin" routerLinkActive="active">Admin</a>
         }
+
+        <a class="cart wish" routerLink="/wishlist" routerLinkActive="active" aria-label="Favoritos">
+          ♥
+          @if (wishlist.count() > 0) {
+            <span class="cart__badge">{{ wishlist.count() }}</span>
+          }
+        </a>
 
         <a class="cart" routerLink="/cart" routerLinkActive="active" aria-label="Carrito">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -96,6 +104,7 @@ import { CartService } from '@core/services/cart.service';
       padding: 0.2rem;
     }
     .cart:hover { color: var(--color-primary-dark); }
+    .wish { font-size: 1.3rem; line-height: 1; }
     .cart__badge {
       position: absolute;
       top: -6px;
@@ -172,6 +181,7 @@ import { CartService } from '@core/services/cart.service';
 export class HeaderComponent {
   protected readonly auth = inject(AuthService);
   protected readonly cart = inject(CartService);
+  protected readonly wishlist = inject(WishlistService);
   private readonly router = inject(Router);
 
   readonly initials = computed(() => {

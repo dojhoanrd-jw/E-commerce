@@ -30,6 +30,17 @@ export const routes: Routes = [
       import('@features/orders/components/my-orders/my-orders.component').then((m) => m.MyOrdersComponent)
   },
   {
+    path: 'orders/:id',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('@features/orders/components/order-detail/order-detail.component').then((m) => m.OrderDetailComponent)
+  },
+  {
+    path: 'wishlist',
+    loadComponent: () =>
+      import('@features/wishlist/components/wishlist/wishlist.component').then((m) => m.WishlistComponent)
+  },
+  {
     path: 'profile',
     canActivate: [authGuard],
     loadComponent: () =>

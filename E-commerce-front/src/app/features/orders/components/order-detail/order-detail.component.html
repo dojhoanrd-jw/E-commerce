@@ -1,0 +1,55 @@
+<div class="page" style="max-width: 720px;">
+  <a class="back" routerLink="/orders">← Volver a mis compras</a>
+
+  @if (loading()) {
+    <p class="muted">Cargando…</p>
+  } @else {
+    @if (order(); as o) {
+      <div class="order-head">
+        <h1>Orden #{{ o.id }}</h1>
+        <span class="order-date">{{ o.createdAt | date: 'medium' }}</span>
+      </div>
+
+      @if (o.status === 'Cancelled') {
+        <div class="cancelled">Esta orden fue cancelada.</div>
+      } @else {
+        <div class="progress">
+          @for (step of steps; track step; let i = $index) {
+            <div class="progress__step" [class.done]="i <= currentStep()">
+              <div class="progress__dot">{{ i < currentStep() ? '✓' : i + 1 }}</div>
+              <span>{{ stepLabel(step) }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Precio</th>
+            <th>Cant.</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of o.items; track item.productId) {
+            <tr>
+              <td>{{ item.productName }}</td>
+              <td>{{ item.unitPrice | currency }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.unitPrice * item.quantity | currency }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <div class="order-total">
+        <span>Total</span>
+        <strong>{{ o.total | currency }}</strong>
+      </div>
+    } @else {
+      <p class="muted">Orden no encontrada.</p>
+    }
+  }
+</div>

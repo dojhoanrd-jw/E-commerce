@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { ProductsService } from '@features/products/services/products.service';
 import { Product, PRODUCT_CATEGORIES } from '@features/products/models/product.model';
 import { CartService } from '@core/services/cart.service';
+import { WishlistService } from '@core/services/wishlist.service';
 import { NotificationService } from '@core/services/notification.service';
 
 @Component({
@@ -17,6 +18,7 @@ import { NotificationService } from '@core/services/notification.service';
 export class HomeComponent implements OnInit {
   private readonly productsService = inject(ProductsService);
   private readonly cart = inject(CartService);
+  readonly wishlist = inject(WishlistService);
   private readonly notification = inject(NotificationService);
 
   readonly categories = PRODUCT_CATEGORIES;
@@ -60,6 +62,12 @@ export class HomeComponent implements OnInit {
     event.stopPropagation();
     this.cart.add(product);
     this.notification.success(`${product.name} agregado al carrito`);
+  }
+
+  toggleWishlist(product: Product, event: Event): void {
+    event.stopPropagation();
+    event.preventDefault();
+    this.wishlist.toggle(product);
   }
 
   clearFilters(): void {

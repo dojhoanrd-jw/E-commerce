@@ -11,7 +11,14 @@
         </div>
 
         <div class="detail__info">
+          <span class="detail__cat">{{ p.category }}</span>
           <h1>{{ p.name }}</h1>
+          @if (reviews().length > 0) {
+            <div class="detail__rating">
+              <span class="stars">{{ averageStars() }}</span>
+              <span>{{ average() | number: '1.1-1' }} ({{ reviews().length }})</span>
+            </div>
+          }
           <p class="detail__desc">{{ p.description }}</p>
           <div class="detail__price">{{ p.price | currency }}</div>
           <div class="detail__stock">Stock disponible: {{ p.stock }}</div>
@@ -28,9 +35,63 @@
             <button class="btn" [disabled]="p.stock === 0" (click)="addToCart()">
               {{ p.stock === 0 ? 'Sin stock' : 'Agregar al carrito' }}
             </button>
+            <button class="heart-btn" type="button" (click)="toggleWishlist()" aria-label="Favorito">
+              {{ wishlist.has(p.id) ? '♥' : '♡' }}
+            </button>
           </div>
         </div>
       </div>
+
+      <section class="reviews">
+        <h2>Reseñas</h2>
+
+        @if (reviews().length === 0) {
+          <p class="muted">Aún no hay reseñas. ¡Sé el primero!</p>
+        } @else {
+          <p class="reviews__avg">
+            <strong>{{ average() | number: '1.1-1' }}</strong> / 5 · {{ reviews().length }} reseña(s)
+          </p>
+          <ul class="reviews__list">
+            @for (r of reviews(); track r.id) {
+              <li class="review">
+                <div class="review__head">
+                  <strong>{{ r.userName }}</strong>
+                  <span class="stars">{{ stars(r.rating) }}</span>
+                </div>
+                @if (r.comment) {
+                  <p class="review__comment">{{ r.comment }}</p>
+                }
+                <span class="review__date">{{ r.createdAt | date: 'mediumDate' }}</span>
+              </li>
+            }
+          </ul>
+        }
+
+        @if (isLoggedIn()) {
+          <form class="review-form" (ngSubmit)="submitReview()">
+            <h3>Deja tu reseña</h3>
+            <label class="field">
+              <span>Calificación</span>
+              <select [(ngModel)]="newRating" name="rating">
+                <option [ngValue]="5">★★★★★ (5)</option>
+                <option [ngValue]="4">★★★★ (4)</option>
+                <option [ngValue]="3">★★★ (3)</option>
+                <option [ngValue]="2">★★ (2)</option>
+                <option [ngValue]="1">★ (1)</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Comentario</span>
+              <textarea [(ngModel)]="newComment" name="comment" rows="3" placeholder="¿Qué te pareció?"></textarea>
+            </label>
+            <button class="btn" type="submit" [disabled]="submitting()">
+              {{ submitting() ? 'Enviando…' : 'Enviar reseña' }}
+            </button>
+          </form>
+        } @else {
+          <p class="muted"><a routerLink="/auth/login">Inicia sesión</a> para dejar una reseña.</p>
+        }
+      </section>
     } @else {
       <p class="muted">Producto no encontrado.</p>
     }

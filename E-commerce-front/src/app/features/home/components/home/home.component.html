@@ -48,6 +48,12 @@
     <div class="products-grid">
       @for (product of filtered(); track product.id) {
         <article class="product-card">
+          <button
+            class="wish-btn"
+            [class.wish-btn--active]="wishlist.has(product.id)"
+            (click)="toggleWishlist(product, $event)"
+            aria-label="Favorito"
+          >♥</button>
           <a class="product-card__link" [routerLink]="['/products', product.id]">
             <div class="image-container">
               <img [src]="product.imageurl" [alt]="product.name" class="product-image" />

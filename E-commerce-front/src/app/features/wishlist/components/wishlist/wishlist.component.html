@@ -1,0 +1,35 @@
+<div class="page">
+  <h1>Favoritos</h1>
+
+  @if (wishlist.items().length === 0) {
+    <div class="empty">
+      <p>No tienes favoritos todavía.</p>
+      <a class="btn-cta" routerLink="/">Ver productos</a>
+    </div>
+  } @else {
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Precio</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of wishlist.items(); track p.id) {
+          <tr>
+            <td class="cell-product">
+              <img [src]="p.imageurl" [alt]="p.name" />
+              <a [routerLink]="['/products', p.id]">{{ p.name }}</a>
+            </td>
+            <td>{{ p.price | currency }}</td>
+            <td class="cell-actions">
+              <button class="link" (click)="addToCart(p)">Agregar al carrito</button>
+              <button class="link link--danger" (click)="wishlist.remove(p.id)">Quitar</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
