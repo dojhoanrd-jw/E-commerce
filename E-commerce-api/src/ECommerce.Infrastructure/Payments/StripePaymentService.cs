@@ -72,6 +72,7 @@ public class StripePaymentService : IPaymentService
         {
             Mode = "payment",
             LineItems = lineItems,
+            AllowPromotionCodes = true,
             SuccessUrl = _settings.SuccessUrl + "?session_id={CHECKOUT_SESSION_ID}",
             CancelUrl = _settings.CancelUrl,
             Metadata = new Dictionary<string, string>

@@ -33,6 +33,14 @@ public class OrderController : ApiControllerBase
         return Ok(orders);
     }
 
+    // GET: api/order/5  (owner or admin)
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<OrderDto>> GetById(int id, CancellationToken cancellationToken)
+    {
+        var order = await _orderService.GetByIdAsync(id, CurrentUserId, IsAdmin, cancellationToken);
+        return Ok(order);
+    }
+
     // GET: api/order  (Admin only) — all orders
     [Authorize(Roles = "Admin")]
     [HttpGet]

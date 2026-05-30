@@ -19,6 +19,8 @@ public class AppDbContext : DbContext, IAppDbContext
 
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
+    public DbSet<Review> Reviews => Set<Review>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Product>(entity =>
@@ -81,6 +83,21 @@ public class AppDbContext : DbContext, IAppDbContext
             entity.Property(e => e.ProductName).HasMaxLength(255).HasColumnName("product_name");
             entity.Property(e => e.UnitPrice).HasPrecision(10, 2).HasColumnName("unit_price");
             entity.Property(e => e.Quantity).HasColumnName("quantity");
+        });
+
+        modelBuilder.Entity<Review>(entity =>
+        {
+            entity.ToTable("reviews");
+            entity.HasKey(e => e.Id).HasName("reviews_pkey");
+            entity.HasIndex(e => new { e.ProductId, e.UserId }).IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.UserName).HasMaxLength(255).HasColumnName("user_name");
+            entity.Property(e => e.Rating).HasColumnName("rating");
+            entity.Property(e => e.Comment).HasColumnName("comment");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
         });
 
         base.OnModelCreating(modelBuilder);

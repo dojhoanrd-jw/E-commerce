@@ -124,6 +124,19 @@ public class OrderService : IOrderService
         return QueryToDtoAsync(_context.Orders, cancellationToken);
     }
 
+    public async Task<OrderDto> GetByIdAsync(int orderId, int userId, bool isAdmin, CancellationToken cancellationToken = default)
+    {
+        var orders = await QueryToDtoAsync(_context.Orders.Where(o => o.Id == orderId), cancellationToken);
+        var order = orders.FirstOrDefault() ?? throw new NotFoundException(nameof(Order), orderId);
+
+        if (!isAdmin && order.UserId != userId)
+        {
+            throw new ForbiddenException("You can only view your own orders.");
+        }
+
+        return order;
+    }
+
     public async Task ChangeStatusAsync(int orderId, string status, CancellationToken cancellationToken = default)
     {
         if (!AllowedStatuses.Contains(status))

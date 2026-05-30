@@ -13,5 +13,7 @@ public interface IAppDbContext
 
     DbSet<OrderItem> OrderItems { get; }
 
+    DbSet<Review> Reviews { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
