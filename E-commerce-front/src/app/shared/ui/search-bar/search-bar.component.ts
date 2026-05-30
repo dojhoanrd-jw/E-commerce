@@ -200,9 +200,7 @@ const RECENT_MAX = 5;
     }
     .panel__all:hover { background: var(--color-bg, #f4f5f6); }
 
-    @media (max-width: 768px) {
-      .search { display: none; }
-    }
+    .search { width: 100%; }
   `]
 })
 export class SearchBarComponent {
