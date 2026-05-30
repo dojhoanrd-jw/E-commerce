@@ -1,5 +1,6 @@
 using ECommerce.Application.Orders;
 using ECommerce.Application.Orders.Dtos;
+using ECommerce.Application.Payments;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +12,17 @@ namespace ECommerce.Api.Controllers;
 public class OrderController : ApiControllerBase
 {
     private readonly IOrderService _orderService;
+    private readonly IPaymentService _paymentService;
+    private readonly IInvoiceService _invoiceService;
 
-    public OrderController(IOrderService orderService)
+    public OrderController(
+        IOrderService orderService,
+        IPaymentService paymentService,
+        IInvoiceService invoiceService)
     {
         _orderService = orderService;
+        _paymentService = paymentService;
+        _invoiceService = invoiceService;
     }
 
     // POST: api/order  (any authenticated user)
@@ -57,5 +65,35 @@ public class OrderController : ApiControllerBase
     {
         await _orderService.ChangeStatusAsync(id, request.Status, cancellationToken);
         return NoContent();
+    }
+
+    // POST: api/order/5/return  (owner) — request a return/refund
+    [HttpPost("{id:int}/return")]
+    public async Task<IActionResult> RequestReturn(int id, RequestReturnRequest request, CancellationToken cancellationToken)
+    {
+        await _orderService.RequestReturnAsync(id, CurrentUserId, request.Reason, cancellationToken);
+        return NoContent();
+    }
+
+    // PUT: api/order/5/return  (Admin only) — approve (refund) or reject a return
+    [Authorize(Roles = "Admin")]
+    [HttpPut("{id:int}/return")]
+    public async Task<IActionResult> ResolveReturn(int id, ResolveReturnRequest request, CancellationToken cancellationToken)
+    {
+        if (request.Approve)
+        {
+            await _paymentService.RefundAsync(id, cancellationToken);
+        }
+
+        await _orderService.ResolveReturnAsync(id, request.Approve, cancellationToken);
+        return NoContent();
+    }
+
+    // GET: api/order/5/invoice  (owner or admin) — download a PDF invoice
+    [HttpGet("{id:int}/invoice")]
+    public async Task<IActionResult> GetInvoice(int id, CancellationToken cancellationToken)
+    {
+        var pdf = await _invoiceService.GenerateAsync(id, CurrentUserId, IsAdmin, cancellationToken);
+        return File(pdf, "application/pdf", $"factura-{id:D6}.pdf");
     }
 }

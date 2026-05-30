@@ -14,6 +14,10 @@ public class OrderDto
 
     public string Status { get; set; } = null!;
 
+    public string ReturnStatus { get; set; } = "None";
+
+    public string? ReturnReason { get; set; }
+
     public List<OrderItemDto> Items { get; set; } = new();
 }
 

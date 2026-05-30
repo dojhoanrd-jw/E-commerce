@@ -88,6 +88,9 @@ public class AppDbContext : DbContext, IAppDbContext
             entity.Property(e => e.Total).HasPrecision(10, 2).HasColumnName("total");
             entity.Property(e => e.Status).HasMaxLength(20).HasColumnName("status");
             entity.Property(e => e.StripeSessionId).HasMaxLength(255).HasColumnName("stripe_session_id");
+            entity.Property(e => e.ReturnStatus).HasMaxLength(20).HasColumnName("return_status");
+            entity.Property(e => e.ReturnReason).HasColumnName("return_reason");
+            entity.Property(e => e.ReturnRequestedAt).HasColumnName("return_requested_at");
 
             entity.HasMany(e => e.Items)
                 .WithOne()

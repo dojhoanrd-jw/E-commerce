@@ -131,6 +131,32 @@ public class StripePaymentService : IPaymentService
         return await _orderService.CreateAsync(userId, request, sessionId, cancellationToken);
     }
 
+    public async Task RefundAsync(int orderId, CancellationToken cancellationToken = default)
+    {
+        var order = await _context.Orders
+            .FirstOrDefaultAsync(o => o.Id == orderId, cancellationToken)
+            ?? throw new NotFoundException("Order", orderId);
+
+        // Orders not paid through Stripe have nothing to refund.
+        if (string.IsNullOrWhiteSpace(order.StripeSessionId))
+        {
+            return;
+        }
+
+        var sessionService = new SessionService();
+        var session = await sessionService.GetAsync(order.StripeSessionId, cancellationToken: cancellationToken);
+
+        if (string.IsNullOrWhiteSpace(session.PaymentIntentId))
+        {
+            return;
+        }
+
+        var refundService = new RefundService();
+        await refundService.CreateAsync(
+            new RefundCreateOptions { PaymentIntent = session.PaymentIntentId },
+            cancellationToken: cancellationToken);
+    }
+
     private static string VariantLabel(ProductVariant v)
     {
         var parts = new List<string>();

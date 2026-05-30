@@ -1,6 +1,8 @@
 using ECommerce.Application.Common.Interfaces;
+using ECommerce.Application.Orders;
 using ECommerce.Application.Payments;
 using ECommerce.Infrastructure.Authentication;
+using ECommerce.Infrastructure.Invoices;
 using ECommerce.Infrastructure.Payments;
 using ECommerce.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +34,8 @@ public static class DependencyInjection
 
         services.AddSingleton(stripeSettings);
         services.AddScoped<IPaymentService, StripePaymentService>();
+
+        services.AddScoped<IInvoiceService, InvoiceService>();
 
         return services;
     }

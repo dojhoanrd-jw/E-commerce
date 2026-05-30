@@ -140,6 +140,55 @@ public class OrderService : IOrderService
         await _context.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task RequestReturnAsync(int orderId, int userId, string reason, CancellationToken cancellationToken = default)
+    {
+        var order = await _context.Orders.FindAsync([orderId], cancellationToken)
+            ?? throw new NotFoundException(nameof(Order), orderId);
+
+        if (order.UserId != userId)
+        {
+            throw new ForbiddenException("You can only request returns on your own orders.");
+        }
+
+        if (order.Status is not ("Shipped" or "Delivered"))
+        {
+            throw new ConflictException("Only shipped or delivered orders can be returned.");
+        }
+
+        if (order.ReturnStatus != "None")
+        {
+            throw new ConflictException("A return has already been requested for this order.");
+        }
+
+        order.ReturnStatus = "Requested";
+        order.ReturnReason = reason.Trim();
+        order.ReturnRequestedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task ResolveReturnAsync(int orderId, bool approve, CancellationToken cancellationToken = default)
+    {
+        var order = await _context.Orders.FindAsync([orderId], cancellationToken)
+            ?? throw new NotFoundException(nameof(Order), orderId);
+
+        if (order.ReturnStatus != "Requested")
+        {
+            throw new ConflictException("This order has no pending return request.");
+        }
+
+        if (approve)
+        {
+            order.ReturnStatus = "Refunded";
+            order.Status = "Cancelled";
+        }
+        else
+        {
+            order.ReturnStatus = "Rejected";
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
     private static string Label(ProductVariant v)
     {
         var parts = new List<string>();
@@ -162,6 +211,8 @@ public class OrderService : IOrderService
         CreatedAt = order.CreatedAt,
         Total = order.Total,
         Status = order.Status,
+        ReturnStatus = order.ReturnStatus,
+        ReturnReason = order.ReturnReason,
         Items = order.Items
             .Select(i => new OrderItemDto
             {
@@ -189,6 +240,8 @@ public class OrderService : IOrderService
                 CreatedAt = o.CreatedAt,
                 Total = o.Total,
                 Status = o.Status,
+                ReturnStatus = o.ReturnStatus,
+                ReturnReason = o.ReturnReason,
                 Items = o.Items
                     .Select(i => new OrderItemDto
                     {

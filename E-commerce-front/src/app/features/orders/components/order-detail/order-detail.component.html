@@ -48,6 +48,55 @@
         <span>Total</span>
         <strong>{{ o.total | currency }}</strong>
       </div>
+
+      <div class="order-actions">
+        <button class="ghost-btn" type="button" (click)="downloadInvoice()">⬇ Descargar factura (PDF)</button>
+        @if (canRequestReturn() && !showReturnForm()) {
+          <button class="ghost-btn" type="button" (click)="showReturnForm.set(true)">↩️ Solicitar devolución</button>
+        }
+      </div>
+
+      @if (showReturnForm()) {
+        <div class="return-box">
+          <h3>Solicitar devolución</h3>
+          <textarea
+            rows="3"
+            placeholder="Cuéntanos el motivo de la devolución…"
+            [ngModel]="returnReason()"
+            (ngModelChange)="returnReason.set($event)"
+          ></textarea>
+          <div class="admin-actions">
+            <button class="btn-approve" type="button" [disabled]="working() || !returnReason().trim()" (click)="submitReturn()">
+              {{ working() ? 'Enviando…' : 'Enviar solicitud' }}
+            </button>
+            <button class="ghost-btn" type="button" (click)="showReturnForm.set(false)">Cancelar</button>
+          </div>
+        </div>
+      }
+
+      @if (o.returnStatus !== 'None') {
+        <div class="return-box">
+          <span
+            class="return-badge"
+            [class.return-badge--requested]="o.returnStatus === 'Requested'"
+            [class.return-badge--refunded]="o.returnStatus === 'Refunded'"
+            [class.return-badge--rejected]="o.returnStatus === 'Rejected'"
+          >{{ returnStatusLabel(o.returnStatus) }}</span>
+          @if (o.returnReason) {
+            <p class="return-reason">Motivo: {{ o.returnReason }}</p>
+          }
+          @if (isAdmin() && o.returnStatus === 'Requested') {
+            <div class="admin-actions">
+              <button class="btn-approve" type="button" [disabled]="working()" (click)="resolveReturn(true)">
+                Aprobar y reembolsar
+              </button>
+              <button class="btn-reject" type="button" [disabled]="working()" (click)="resolveReturn(false)">
+                Rechazar
+              </button>
+            </div>
+          }
+        </div>
+      }
     } @else {
       <p class="muted">Orden no encontrada.</p>
     }

@@ -13,6 +13,8 @@ export interface Order {
   createdAt: string;
   total: number;
   status: string;
+  returnStatus: string;
+  returnReason?: string | null;
   items: OrderItem[];
 }
 

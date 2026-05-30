@@ -7,4 +7,7 @@ public interface IPaymentService
     Task<string> CreateCheckoutSessionAsync(int userId, CreateOrderRequest request, CancellationToken cancellationToken = default);
 
     Task<OrderDto> ConfirmAsync(string sessionId, CancellationToken cancellationToken = default);
+
+    // Refunds the payment associated with an order (no-op if it had no Stripe payment).
+    Task RefundAsync(int orderId, CancellationToken cancellationToken = default);
 }
