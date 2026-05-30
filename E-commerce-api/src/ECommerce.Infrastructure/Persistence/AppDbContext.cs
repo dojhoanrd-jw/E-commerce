@@ -15,6 +15,10 @@ public class AppDbContext : DbContext, IAppDbContext
 
     public DbSet<User> Users => Set<User>();
 
+    public DbSet<Order> Orders => Set<Order>();
+
+    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Product>(entity =>
@@ -44,6 +48,36 @@ public class AppDbContext : DbContext, IAppDbContext
                 .HasConversion<string>()
                 .HasMaxLength(20)
                 .HasColumnName("role");
+        });
+
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.ToTable("orders");
+            entity.HasKey(e => e.Id).HasName("orders_pkey");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.Total).HasPrecision(10, 2).HasColumnName("total");
+            entity.Property(e => e.Status).HasMaxLength(20).HasColumnName("status");
+
+            entity.HasMany(e => e.Items)
+                .WithOne()
+                .HasForeignKey(i => i.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<OrderItem>(entity =>
+        {
+            entity.ToTable("order_items");
+            entity.HasKey(e => e.Id).HasName("order_items_pkey");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.ProductName).HasMaxLength(255).HasColumnName("product_name");
+            entity.Property(e => e.UnitPrice).HasPrecision(10, 2).HasColumnName("unit_price");
+            entity.Property(e => e.Quantity).HasColumnName("quantity");
         });
 
         base.OnModelCreating(modelBuilder);
