@@ -9,7 +9,7 @@ import { RouterLink } from '@angular/router';
     <footer class="footer">
       <div class="footer__top">
         <div class="footer__brand">
-          <span class="footer__logo"><span class="dot">●</span> ShopHub</span>
+          <span class="footer__logo"><span class="dot">●</span> E-commerce</span>
           <p>Tu tienda online de tecnología, hogar, ropa y más — con envío rápido y pago seguro.</p>
         </div>
 
@@ -43,7 +43,7 @@ import { RouterLink } from '@angular/router';
       </div>
 
       <div class="footer__bottom">
-        <span>© {{ year }} ShopHub. Todos los derechos reservados.</span>
+        <span>© {{ year }} E-commerce. Todos los derechos reservados.</span>
         <span>Hecho con Angular + .NET</span>
       </div>
     </footer>

@@ -11,7 +11,7 @@ import { WishlistService } from '@core/services/wishlist.service';
   template: `
     <header class="app-header">
       <a class="brand" routerLink="/">
-        <span class="brand__dot">●</span> ShopHub
+        <span class="brand__dot">●</span> E-commerce
       </a>
 
       <nav class="nav">
