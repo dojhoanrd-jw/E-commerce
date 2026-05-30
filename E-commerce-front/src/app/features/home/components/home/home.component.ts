@@ -91,10 +91,23 @@ export class HomeComponent implements OnInit {
       { allowSignalWrites: true }
     );
 
-    // Keep the search box in sync with the ?q= query param (set by the header search bar).
+    // Keep search/category in sync with the URL query params (header search bar + department bar).
     this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
       this.search.set(params.get('q') ?? '');
+      this.category.set(params.get('category') ?? '');
     });
+  }
+
+  categoryEmoji(category: string): string {
+    const map: Record<string, string> = {
+      'Electrónica': '📱',
+      'Hogar': '🏠',
+      'Ropa': '👕',
+      'Deportes': '⚽',
+      'Juguetes': '🧸',
+      'Otros': '📦'
+    };
+    return map[category] ?? '🛍️';
   }
 
   goToPage(p: number): void {

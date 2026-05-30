@@ -4,12 +4,14 @@ import { AuthService } from '@core/services/auth.service';
 import { CartService } from '@core/services/cart.service';
 import { WishlistService } from '@core/services/wishlist.service';
 import { SearchBarComponent } from '@shared/ui/search-bar/search-bar.component';
+import { PRODUCT_CATEGORIES } from '@features/products/models/product.model';
 
 @Component({
   selector: 'app-header',
   standalone: true,
   imports: [RouterLink, RouterLinkActive, SearchBarComponent],
   template: `
+    <div class="site-header">
     <header class="app-header">
       <a class="brand" routerLink="/">
         <span class="brand__dot">●</span> E-commerce
@@ -63,20 +65,56 @@ import { SearchBarComponent } from '@shared/ui/search-bar/search-bar.component';
         }
       </nav>
     </header>
+
+    <nav class="dept-bar">
+      <a class="dept" [routerLink]="['/']">Todo</a>
+      @for (c of categories; track c) {
+        <a class="dept" [routerLink]="['/']" [queryParams]="{ category: c }">{{ c }}</a>
+      }
+      <a class="dept dept--accent" [routerLink]="['/']" fragment="ofertas">🔥 Ofertas</a>
+    </nav>
+    </div>
   `,
   styles: [`
-    .app-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.85rem 1.75rem;
-      background: var(--color-surface);
-      border-bottom: 1px solid var(--color-border);
-      box-shadow: var(--shadow-sm);
+    .site-header {
       position: sticky;
       top: 0;
       z-index: 50;
+      background: var(--color-surface);
+      box-shadow: var(--shadow-sm);
     }
+    .app-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      justify-content: space-between;
+      padding: 0.7rem 1.75rem;
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .dept-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 1.75rem;
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .dept-bar::-webkit-scrollbar { display: none; }
+    .dept {
+      flex-shrink: 0;
+      color: var(--color-ink-soft);
+      font-size: 0.86rem;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .dept:hover { background: var(--color-bg); color: var(--color-ink); text-decoration: none; }
+    .dept--accent { color: var(--color-accent-dark); }
     .brand {
       font-weight: 800;
       font-size: 1.2rem;
@@ -186,6 +224,8 @@ export class HeaderComponent {
   protected readonly cart = inject(CartService);
   protected readonly wishlist = inject(WishlistService);
   private readonly router = inject(Router);
+
+  protected readonly categories = PRODUCT_CATEGORIES;
 
   readonly initials = computed(() => {
     const name = this.auth.currentUser()?.name ?? '';

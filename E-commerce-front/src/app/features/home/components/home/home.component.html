@@ -1,30 +1,23 @@
-<section class="hero">
-  <div class="hero__content">
-    <span class="hero__eyebrow">Tienda online</span>
-    <h1>Todo lo que necesitas, en <span>E-commerce</span></h1>
-    <p>Tecnología, hogar, ropa y más — con los mejores precios y envío rápido.</p>
-    <a class="hero__cta" href="#catalogo">Explorar productos</a>
-  </div>
-</section>
-
 <div class="container">
-  <div class="chips">
-    <button class="chip" [class.chip--active]="category() === ''" (click)="category.set('')">Todo</button>
-    @for (c of categories; track c) {
-      <button class="chip" [class.chip--active]="category() === c" (click)="category.set(c)">{{ c }}</button>
-    }
-  </div>
+  <!-- Slim promo banner -->
+  <section class="promo">
+    <div class="promo__text">
+      <strong>Todo lo que necesitas, en un solo lugar</strong>
+      <span>Tecnología, hogar, ropa y más — con los mejores precios y envío rápido.</span>
+    </div>
+    <a class="promo__cta" href="#catalogo">Explorar productos</a>
+  </section>
 
   @if (deals().length > 0) {
-    <section class="deals">
-      <h2 class="deals__title">🔥 Ofertas del día</h2>
-      <div class="deals__row">
+    <section class="strip" id="ofertas">
+      <h2 class="strip__title">🔥 Ofertas del día</h2>
+      <div class="strip__row">
         @for (product of deals(); track product.id) {
-          <a class="deal-card" [routerLink]="['/products', product.id]">
+          <a class="mini-card" [routerLink]="['/products', product.id]">
             <span class="sale-badge">-{{ discountPercent(product) }}%</span>
-            <img [src]="product.imageurl" [alt]="product.name" />
-            <span class="deal-card__name">{{ product.name }}</span>
-            <span class="deal-card__price">
+            <div class="mini-card__img"><img [src]="product.imageurl" [alt]="product.name" /></div>
+            <span class="mini-card__name">{{ product.name }}</span>
+            <span class="mini-card__price">
               {{ effective(product) | currency }}
               <span class="price-old">{{ product.price | currency }}</span>
             </span>
@@ -33,6 +26,19 @@
       </div>
     </section>
   }
+
+  <!-- Category tiles -->
+  <section class="cat-tiles">
+    <h2 class="section-title">Explora por categoría</h2>
+    <div class="cat-tiles__row">
+      @for (c of categories; track c) {
+        <a class="cat-tile" [routerLink]="['/']" [queryParams]="{ category: c }">
+          <span class="cat-tile__emoji">{{ categoryEmoji(c) }}</span>
+          <span class="cat-tile__name">{{ c }}</span>
+        </a>
+      }
+    </div>
+  </section>
 
   <div class="shop" id="catalogo">
     <aside class="sidebar">
@@ -106,7 +112,6 @@
                   <img [src]="product.imageurl" [alt]="product.name" class="product-image" />
                 </div>
                 <div class="product-info">
-                  <span class="product-cat">{{ product.category }}</span>
                   <h3 class="product-name">{{ product.name }}</h3>
                   @if (product.reviewCount > 0) {
                     <div class="card-rating">
@@ -114,15 +119,13 @@
                       <span>({{ product.reviewCount }})</span>
                     </div>
                   }
-                  <div class="product-details">
-                    <span class="price">
-                      {{ effective(product) | currency }}
-                      @if (hasDiscount(product)) {
-                        <span class="price-old">{{ product.price | currency }}</span>
-                      }
-                    </span>
-                    <span class="stock">Stock: {{ totalStock(product) }}</span>
+                  <div class="price-row">
+                    <span class="price">{{ effective(product) | currency }}</span>
+                    @if (hasDiscount(product)) {
+                      <span class="price-old">{{ product.price | currency }}</span>
+                    }
                   </div>
+                  <span class="ship-note">Envío rápido · Stock: {{ totalStock(product) }}</span>
                 </div>
               </a>
               <button
@@ -150,14 +153,14 @@
   </div>
 
   @if (recentlyViewed.items().length > 0) {
-    <section class="recent">
-      <h2 class="recent__title">🕘 Vistos recientemente</h2>
-      <div class="recent__row">
+    <section class="strip strip--recent">
+      <h2 class="strip__title">🕘 Vistos recientemente</h2>
+      <div class="strip__row">
         @for (item of recentlyViewed.items(); track item.id) {
-          <a class="recent-card" [routerLink]="['/products', item.id]">
-            <img [src]="item.imageurl" [alt]="item.name" />
-            <span class="recent-card__name">{{ item.name }}</span>
-            <span class="recent-card__price">{{ (item.salePrice ?? item.price) | currency }}</span>
+          <a class="mini-card" [routerLink]="['/products', item.id]">
+            <div class="mini-card__img"><img [src]="item.imageurl" [alt]="item.name" /></div>
+            <span class="mini-card__name">{{ item.name }}</span>
+            <span class="mini-card__price">{{ (item.salePrice ?? item.price) | currency }}</span>
           </a>
         }
       </div>

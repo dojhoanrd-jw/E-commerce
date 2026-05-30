@@ -36,12 +36,19 @@
             </div>
           }
           <p class="detail__desc">{{ p.description }}</p>
+        </div>
+
+        <aside class="buybox">
           <div class="detail__price">
             {{ effective(p) | currency }}
             @if (hasDiscount(p)) {
               <span class="detail__price-old">{{ p.price | currency }}</span>
             }
           </div>
+          @if (hasDiscount(p)) {
+            <span class="buybox__save">Ahorras {{ (p.price - effective(p)) | currency }}</span>
+          }
+
           @if (hasVariants()) {
             <div class="variants">
               <span class="variants__label">Elige una opción</span>
@@ -60,7 +67,7 @@
               </div>
             </div>
             <div class="detail__stock">
-              {{ selectedVariant() ? 'Stock disponible: ' + availableStock() : 'Selecciona una opción arriba' }}
+              {{ selectedVariant() ? 'Stock disponible: ' + availableStock() : 'Selecciona una opción' }}
             </div>
           } @else {
             <div class="detail__stock">Stock disponible: {{ p.stock }}</div>
@@ -82,11 +89,17 @@
             >
               {{ hasVariants() && !selectedVariant() ? 'Elige una opción' : (availableStock() === 0 ? 'Sin stock' : 'Agregar al carrito') }}
             </button>
-            <button class="heart-btn" type="button" (click)="toggleWishlist()" aria-label="Favorito">
-              {{ wishlist.has(p.id) ? '♥' : '♡' }}
-            </button>
           </div>
-        </div>
+          <button class="wish-wide" type="button" (click)="toggleWishlist()">
+            {{ wishlist.has(p.id) ? '♥ En tu lista de deseos' : '♡ Agregar a lista de deseos' }}
+          </button>
+
+          <ul class="buybox__trust">
+            <li>🚚 Envío rápido disponible</li>
+            <li>↩️ Devoluciones sin complicaciones</li>
+            <li>🔒 Pago seguro con Stripe</li>
+          </ul>
+        </aside>
       </div>
 
       <section class="reviews">
