@@ -1,0 +1,40 @@
+<div class="page">
+  <h1>Mis compras</h1>
+
+  @if (loading()) {
+    <p class="muted">Cargando…</p>
+  } @else if (orders().length === 0) {
+    <div class="empty">
+      <p>Aún no has realizado compras.</p>
+      <a class="btn-cta" routerLink="/">Ver productos</a>
+    </div>
+  } @else {
+    <div class="orders">
+      @for (order of orders(); track order.id) {
+        <article class="order-card">
+          <div class="order-card__head">
+            <div>
+              <strong>Orden #{{ order.id }}</strong>
+              <span class="order-date">{{ order.createdAt | date: 'medium' }}</span>
+            </div>
+            <span class="order-status">{{ order.status }}</span>
+          </div>
+
+          <ul class="order-items">
+            @for (item of order.items; track item.productId) {
+              <li>
+                <span>{{ item.quantity }} × {{ item.productName }}</span>
+                <span>{{ item.unitPrice * item.quantity | currency }}</span>
+              </li>
+            }
+          </ul>
+
+          <div class="order-total">
+            <span>Total</span>
+            <strong>{{ order.total | currency }}</strong>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</div>

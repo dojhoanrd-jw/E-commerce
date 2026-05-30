@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
-import { ProductsComponent } from '@features/products/components/products/products.component';
+import { ProductDetailComponent } from '@features/products/components/product-detail/product-detail.component';
 
 export const PRODUCTS_ROUTES: Routes = [
-  { path: '', component: ProductsComponent }
+  { path: ':id', component: ProductDetailComponent }
 ];

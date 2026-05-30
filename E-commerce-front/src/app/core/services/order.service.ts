@@ -1,0 +1,17 @@
+import { Injectable, inject } from '@angular/core';
+import { Observable } from 'rxjs';
+import { ApiService } from '@core/services/api.service';
+import { CreateOrderItem, Order } from '@core/models/order.model';
+
+@Injectable({ providedIn: 'root' })
+export class OrderService {
+  private readonly api = inject(ApiService);
+
+  createOrder(items: CreateOrderItem[]): Observable<Order> {
+    return this.api.post<Order>('order', { items });
+  }
+
+  getMyOrders(): Observable<Order[]> {
+    return this.api.get<Order[]>('order/mine');
+  }
+}

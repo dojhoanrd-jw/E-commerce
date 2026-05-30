@@ -1,0 +1,49 @@
+<div class="page">
+  <h1>Tu carrito</h1>
+
+  @if (cart.items().length === 0) {
+    <div class="empty">
+      <p>Tu carrito está vacío.</p>
+      <a class="btn-cta" routerLink="/">Ver productos</a>
+    </div>
+  } @else {
+    <div class="cart">
+      <div class="cart__list">
+        @for (item of cart.items(); track item.productId) {
+          <div class="cart-row">
+            <img [src]="item.imageurl" [alt]="item.name" class="cart-row__img" />
+            <div class="cart-row__info">
+              <strong>{{ item.name }}</strong>
+              <span class="cart-row__price">{{ item.price | currency }}</span>
+            </div>
+            <input
+              type="number"
+              min="1"
+              class="qty-input"
+              [ngModel]="item.quantity"
+              (ngModelChange)="changeQty(item.productId, $event)"
+            />
+            <span class="cart-row__subtotal">{{ item.price * item.quantity | currency }}</span>
+            <button class="cart-row__remove" (click)="remove(item.productId)" aria-label="Quitar">&times;</button>
+          </div>
+        }
+      </div>
+
+      <aside class="cart__summary">
+        <h3>Resumen</h3>
+        <div class="cart__summary-row">
+          <span>Productos</span>
+          <span>{{ cart.count() }}</span>
+        </div>
+        <div class="cart__summary-row cart__summary-total">
+          <span>Total</span>
+          <strong>{{ cart.total() | currency }}</strong>
+        </div>
+        <button class="btn" [disabled]="placing()" (click)="checkout()">
+          {{ placing() ? 'Procesando…' : 'Realizar compra' }}
+        </button>
+        <a class="cart__continue" routerLink="/">Seguir comprando</a>
+      </aside>
+    </div>
+  }
+</div>

@@ -1,0 +1,44 @@
+<section class="hero">
+  <div class="hero__content">
+    <span class="hero__eyebrow">Tienda online</span>
+    <h1>Todo lo que necesitas, en <span>ShopHub</span></h1>
+    <p>Tecnología, gadgets y más — con los mejores precios y envío rápido.</p>
+    <a class="hero__cta" href="#catalogo">Explorar productos</a>
+  </div>
+</section>
+
+<section class="catalog" id="catalogo">
+  <div class="catalog__head">
+    <h2>Nuestros productos</h2>
+    @if (!loading) {
+      <span class="catalog__count">{{ products.length }} productos</span>
+    }
+  </div>
+
+  @if (loading) {
+    <p class="muted">Cargando productos…</p>
+  } @else if (products.length === 0) {
+    <p class="muted">No hay productos disponibles.</p>
+  } @else {
+    <div class="products-grid">
+      @for (product of products; track product.id) {
+        <article class="product-card">
+          <a class="product-card__link" [routerLink]="['/products', product.id]">
+            <div class="image-container">
+              <img [src]="product.imageurl" [alt]="product.name" class="product-image" />
+            </div>
+            <div class="product-info">
+              <h3 class="product-name">{{ product.name }}</h3>
+              <p class="product-description">{{ product.description }}</p>
+              <div class="product-details">
+                <span class="price">{{ product.price | currency }}</span>
+                <span class="stock">Stock: {{ product.stock }}</span>
+              </div>
+            </div>
+          </a>
+          <button class="btn add-btn" (click)="addToCart(product, $event)">Agregar al carrito</button>
+        </article>
+      }
+    </div>
+  }
+</section>

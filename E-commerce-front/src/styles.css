@@ -259,3 +259,41 @@ a:hover {
     display: none;
   }
 }
+
+/* ===== Shared page helpers ===== */
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem;
+}
+
+.page > h1 {
+  font-size: 1.9rem;
+  letter-spacing: -0.02em;
+  margin: 0 0 1.75rem;
+}
+
+.empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--color-muted);
+}
+
+.empty p {
+  margin-bottom: 1.25rem;
+}
+
+.btn-cta {
+  display: inline-block;
+  background: var(--color-accent);
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.btn-cta:hover {
+  background: var(--color-accent-dark);
+  text-decoration: none;
+}

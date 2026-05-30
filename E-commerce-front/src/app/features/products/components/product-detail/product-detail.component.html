@@ -1,0 +1,38 @@
+<div class="detail-page">
+  @if (loading()) {
+    <p class="muted">Cargando…</p>
+  } @else {
+    @if (product(); as p) {
+      <a class="back" routerLink="/">← Volver a la tienda</a>
+
+      <div class="detail">
+        <div class="detail__image">
+          <img [src]="p.imageurl" [alt]="p.name" />
+        </div>
+
+        <div class="detail__info">
+          <h1>{{ p.name }}</h1>
+          <p class="detail__desc">{{ p.description }}</p>
+          <div class="detail__price">{{ p.price | currency }}</div>
+          <div class="detail__stock">Stock disponible: {{ p.stock }}</div>
+
+          <div class="detail__actions">
+            <input
+              type="number"
+              min="1"
+              [max]="p.stock"
+              [(ngModel)]="quantity"
+              class="qty-input"
+              [disabled]="p.stock === 0"
+            />
+            <button class="btn" [disabled]="p.stock === 0" (click)="addToCart()">
+              {{ p.stock === 0 ? 'Sin stock' : 'Agregar al carrito' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <p class="muted">Producto no encontrado.</p>
+    }
+  }
+</div>
