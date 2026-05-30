@@ -14,7 +14,8 @@ public static class DependencyInjection
         this IServiceCollection services,
         string? connectionString,
         JwtSettings jwtSettings,
-        StripeSettings stripeSettings)
+        StripeSettings stripeSettings,
+        GoogleSettings googleSettings)
     {
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(connectionString));
@@ -24,6 +25,9 @@ public static class DependencyInjection
         services.AddSingleton(jwtSettings);
         services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+
+        services.AddSingleton(googleSettings);
+        services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
 
         services.AddSingleton(stripeSettings);
         services.AddScoped<IPaymentService, StripePaymentService>();

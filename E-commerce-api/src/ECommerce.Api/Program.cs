@@ -83,8 +83,15 @@ var stripeSettings = new StripeSettings
     CancelUrl = $"{frontendBase}/cart"
 };
 
+// Google sign-in (the OAuth Web Client ID comes from GOOGLE_CLIENT_ID)
+var googleSettings = new GoogleSettings
+{
+    ClientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID")
+        ?? builder.Configuration["Google:ClientId"] ?? string.Empty
+};
+
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(connectionString, jwtSettings, stripeSettings);
+builder.Services.AddInfrastructure(connectionString, jwtSettings, stripeSettings, googleSettings);
 
 var app = builder.Build();
 

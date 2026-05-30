@@ -32,6 +32,14 @@ public class AuthController : ApiControllerBase
         return Ok(response);
     }
 
+    // POST: api/auth/google
+    [HttpPost("google")]
+    public async Task<ActionResult<AuthResponse>> GoogleLogin(GoogleLoginRequest request, CancellationToken cancellationToken)
+    {
+        var response = await _authService.GoogleLoginAsync(request, cancellationToken);
+        return Ok(response);
+    }
+
     // PUT: api/auth/profile  (authenticated)
     [Authorize]
     [HttpPut("profile")]

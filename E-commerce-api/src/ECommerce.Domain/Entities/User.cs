@@ -10,7 +10,8 @@ public class User
 
     public string Email { get; set; } = null!;
 
-    public string PasswordHash { get; set; } = null!;
+    // Null for accounts created through an external provider (e.g. Google sign-in).
+    public string? PasswordHash { get; set; }
 
     public UserRole Role { get; set; }
 }

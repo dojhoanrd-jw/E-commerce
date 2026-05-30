@@ -4,11 +4,12 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 import { NotificationService } from '@core/services/notification.service';
 import { UserRole } from '@core/models/auth.model';
+import { GoogleButtonComponent } from '@shared/ui/google-button/google-button.component';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, GoogleButtonComponent],
   templateUrl: './register.component.html'
 })
 export class RegisterComponent {
@@ -34,6 +35,17 @@ export class RegisterComponent {
 
     this.loading.set(true);
     this.auth.register(this.form.getRawValue()).subscribe({
+      next: () => {
+        this.notification.success('Cuenta creada con éxito');
+        this.router.navigate(['/products']);
+      },
+      error: () => this.loading.set(false)
+    });
+  }
+
+  googleLogin(credential: string): void {
+    this.loading.set(true);
+    this.auth.googleLogin(credential).subscribe({
       next: () => {
         this.notification.success('Cuenta creada con éxito');
         this.router.navigate(['/products']);

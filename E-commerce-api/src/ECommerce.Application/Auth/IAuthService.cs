@@ -8,6 +8,8 @@ public interface IAuthService
 
     Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default);
 
+    Task<AuthResponse> GoogleLoginAsync(GoogleLoginRequest request, CancellationToken cancellationToken = default);
+
     Task<AuthResponse> UpdateProfileAsync(int userId, UpdateProfileRequest request, CancellationToken cancellationToken = default);
 
     Task ChangePasswordAsync(int userId, ChangePasswordRequest request, CancellationToken cancellationToken = default);

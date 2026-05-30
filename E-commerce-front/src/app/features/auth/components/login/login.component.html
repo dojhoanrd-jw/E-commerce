@@ -32,6 +32,10 @@
         {{ loading() ? 'Ingresando…' : 'Iniciar sesión' }}
       </button>
 
+      <div class="auth__divider"><span>o</span></div>
+
+      <app-google-button (credential)="googleLogin($event)" />
+
       <p class="auth__switch">
         ¿No tienes cuenta? <a routerLink="/auth/register">Crear cuenta</a>
       </p>

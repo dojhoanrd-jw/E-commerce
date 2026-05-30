@@ -31,6 +31,12 @@ export class AuthService {
       .pipe(tap((response) => this.setSession(response)));
   }
 
+  googleLogin(credential: string): Observable<AuthResponse> {
+    return this.api
+      .post<AuthResponse>('auth/google', { credential })
+      .pipe(tap((response) => this.setSession(response)));
+  }
+
   updateProfile(name: string): Observable<AuthResponse> {
     return this.api
       .put<AuthResponse>('auth/profile', { name })

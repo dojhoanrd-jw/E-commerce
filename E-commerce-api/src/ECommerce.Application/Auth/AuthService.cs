@@ -12,15 +12,18 @@ public class AuthService : IAuthService
     private readonly IAppDbContext _context;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
+    private readonly IGoogleTokenValidator _googleTokenValidator;
 
     public AuthService(
         IAppDbContext context,
         IPasswordHasher passwordHasher,
-        IJwtTokenGenerator jwtTokenGenerator)
+        IJwtTokenGenerator jwtTokenGenerator,
+        IGoogleTokenValidator googleTokenValidator)
     {
         _context = context;
         _passwordHasher = passwordHasher;
         _jwtTokenGenerator = jwtTokenGenerator;
+        _googleTokenValidator = googleTokenValidator;
     }
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
@@ -58,9 +61,35 @@ public class AuthService : IAuthService
         var email = request.Email.Trim().ToLowerInvariant();
 
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
-        if (user is null || !_passwordHasher.Verify(request.Password, user.PasswordHash))
+        if (user is null || user.PasswordHash is null || !_passwordHasher.Verify(request.Password, user.PasswordHash))
         {
             throw new UnauthorizedException("Invalid email or password.");
+        }
+
+        return BuildResponse(user);
+    }
+
+    public async Task<AuthResponse> GoogleLoginAsync(GoogleLoginRequest request, CancellationToken cancellationToken = default)
+    {
+        var payload = await _googleTokenValidator.ValidateAsync(request.Credential, cancellationToken)
+            ?? throw new UnauthorizedException("Invalid Google credential.");
+
+        var email = payload.Email.Trim().ToLowerInvariant();
+
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+        if (user is null)
+        {
+            // First time signing in with Google: provision a buyer account with no local password.
+            user = new User
+            {
+                Name = string.IsNullOrWhiteSpace(payload.Name) ? email : payload.Name.Trim(),
+                Email = email,
+                PasswordHash = null,
+                Role = UserRole.Buyer
+            };
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
         return BuildResponse(user);
@@ -82,6 +111,11 @@ public class AuthService : IAuthService
     {
         var user = await _context.Users.FindAsync([userId], cancellationToken)
             ?? throw new NotFoundException(nameof(User), userId);
+
+        if (user.PasswordHash is null)
+        {
+            throw new ConflictException("This account uses Google sign-in and has no password to change.");
+        }
 
         if (!_passwordHasher.Verify(request.CurrentPassword, user.PasswordHash))
         {
