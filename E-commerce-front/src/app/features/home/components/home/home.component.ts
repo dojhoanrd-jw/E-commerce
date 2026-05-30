@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -6,6 +6,7 @@ import { ProductsService } from '@features/products/services/products.service';
 import { Product, PRODUCT_CATEGORIES, effectivePrice } from '@features/products/models/product.model';
 import { CartService } from '@core/services/cart.service';
 import { WishlistService } from '@core/services/wishlist.service';
+import { RecentlyViewedService } from '@core/services/recently-viewed.service';
 import { NotificationService } from '@core/services/notification.service';
 
 @Component({
@@ -19,6 +20,7 @@ export class HomeComponent implements OnInit {
   private readonly productsService = inject(ProductsService);
   private readonly cart = inject(CartService);
   readonly wishlist = inject(WishlistService);
+  readonly recentlyViewed = inject(RecentlyViewedService);
   private readonly notification = inject(NotificationService);
   private readonly router = inject(Router);
 
@@ -64,6 +66,36 @@ export class HomeComponent implements OnInit {
   });
 
   readonly deals = computed(() => this.allProducts().filter((p) => this.hasDiscount(p)).slice(0, 8));
+
+  readonly pageSize = 12;
+  readonly page = signal(1);
+  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.filtered().length / this.pageSize)));
+  readonly pages = computed(() => Array.from({ length: this.totalPages() }, (_, i) => i + 1));
+  readonly pagedProducts = computed(() => {
+    const start = (this.page() - 1) * this.pageSize;
+    return this.filtered().slice(start, start + this.pageSize);
+  });
+
+  constructor() {
+    // Reset to the first page whenever the filters or sort change.
+    effect(
+      () => {
+        this.search();
+        this.category();
+        this.maxPrice();
+        this.sort();
+        this.page.set(1);
+      },
+      { allowSignalWrites: true }
+    );
+  }
+
+  goToPage(p: number): void {
+    if (p >= 1 && p <= this.totalPages()) {
+      this.page.set(p);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
 
   ngOnInit(): void {
     this.productsService.getProduct().subscribe({

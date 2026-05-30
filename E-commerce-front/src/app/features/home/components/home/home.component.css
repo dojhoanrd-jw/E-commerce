@@ -327,7 +327,8 @@
   color: #fff;
 }
 
-.deals {
+.deals,
+.recent {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
@@ -335,20 +336,27 @@
   margin-bottom: 2rem;
 }
 
-.deals__title {
+.recent {
+  margin: 2.5rem 0 0;
+}
+
+.deals__title,
+.recent__title {
   font-size: 1.3rem;
   margin: 0 0 1rem;
   letter-spacing: -0.02em;
 }
 
-.deals__row {
+.deals__row,
+.recent__row {
   display: flex;
   gap: 1rem;
   overflow-x: auto;
   padding-bottom: 0.5rem;
 }
 
-.deal-card {
+.deal-card,
+.recent-card {
   position: relative;
   flex: 0 0 150px;
   display: flex;
@@ -358,7 +366,8 @@
   color: inherit;
 }
 
-.deal-card img {
+.deal-card img,
+.recent-card img {
   width: 100%;
   height: 130px;
   object-fit: cover;
@@ -366,7 +375,8 @@
   background: #fff;
 }
 
-.deal-card__name {
+.deal-card__name,
+.recent-card__name {
   font-size: 0.85rem;
   font-weight: 600;
   overflow: hidden;
@@ -377,6 +387,48 @@
 .deal-card__price {
   font-weight: 800;
   color: var(--color-accent-dark);
+}
+
+.recent-card__price {
+  font-weight: 800;
+  color: var(--color-primary-dark);
+}
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 2rem;
+}
+
+.page-btn {
+  min-width: 40px;
+  padding: 0.5rem 0.85rem;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: inherit;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.page-btn--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.page-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .shop {

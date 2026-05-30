@@ -9,6 +9,7 @@ import { WishlistService } from '@core/services/wishlist.service';
 import { NotificationService } from '@core/services/notification.service';
 import { ReviewService, Review } from '@core/services/review.service';
 import { AuthService } from '@core/services/auth.service';
+import { RecentlyViewedService } from '@core/services/recently-viewed.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -25,6 +26,7 @@ export class ProductDetailComponent implements OnInit {
   private readonly notification = inject(NotificationService);
   private readonly reviewService = inject(ReviewService);
   private readonly auth = inject(AuthService);
+  private readonly recentlyViewed = inject(RecentlyViewedService);
 
   readonly product = signal<Product | null>(null);
   readonly loading = signal(true);
@@ -76,6 +78,7 @@ export class ProductDetailComponent implements OnInit {
         this.selectedImage.set(p.imageurl);
         this.loading.set(false);
         this.loadRelated(p);
+        this.recentlyViewed.add(p);
       },
       error: () => this.loading.set(false)
     });

@@ -90,7 +90,7 @@
         <p class="muted">No se encontraron productos.</p>
       } @else {
         <div class="products-grid">
-          @for (product of filtered(); track product.id) {
+          @for (product of pagedProducts(); track product.id) {
             <article class="product-card">
               <button
                 class="wish-btn"
@@ -135,7 +135,32 @@
             </article>
           }
         </div>
+
+        @if (totalPages() > 1) {
+          <nav class="pagination" aria-label="Paginación">
+            <button class="page-btn" [disabled]="page() === 1" (click)="goToPage(page() - 1)">‹ Anterior</button>
+            @for (p of pages(); track p) {
+              <button class="page-btn" [class.page-btn--active]="p === page()" (click)="goToPage(p)">{{ p }}</button>
+            }
+            <button class="page-btn" [disabled]="page() === totalPages()" (click)="goToPage(page() + 1)">Siguiente ›</button>
+          </nav>
+        }
       }
     </div>
   </div>
+
+  @if (recentlyViewed.items().length > 0) {
+    <section class="recent">
+      <h2 class="recent__title">🕘 Vistos recientemente</h2>
+      <div class="recent__row">
+        @for (item of recentlyViewed.items(); track item.id) {
+          <a class="recent-card" [routerLink]="['/products', item.id]">
+            <img [src]="item.imageurl" [alt]="item.name" />
+            <span class="recent-card__name">{{ item.name }}</span>
+            <span class="recent-card__price">{{ (item.salePrice ?? item.price) | currency }}</span>
+          </a>
+        }
+      </div>
+    </section>
+  }
 </div>
