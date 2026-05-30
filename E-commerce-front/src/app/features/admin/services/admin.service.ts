@@ -30,4 +30,8 @@ export class AdminService {
   getAllOrders(): Observable<Order[]> {
     return this.api.get<Order[]>('order');
   }
+
+  changeOrderStatus(id: number, status: string): Observable<void> {
+    return this.api.put<void>(`order/${id}/status`, { status });
+  }
 }

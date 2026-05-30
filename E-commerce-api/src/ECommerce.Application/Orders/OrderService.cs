@@ -8,6 +8,8 @@ namespace ECommerce.Application.Orders;
 
 public class OrderService : IOrderService
 {
+    private static readonly string[] AllowedStatuses = { "Pending", "Shipped", "Delivered", "Cancelled" };
+
     private readonly IAppDbContext _context;
 
     public OrderService(IAppDbContext context)
@@ -30,7 +32,7 @@ public class OrderService : IOrderService
         {
             UserId = userId,
             CreatedAt = DateTime.UtcNow,
-            Status = "Paid"
+            Status = "Pending"
         };
 
         foreach (var (productId, quantity) in requested)
@@ -88,6 +90,20 @@ public class OrderService : IOrderService
     public Task<IEnumerable<OrderDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return QueryToDtoAsync(_context.Orders, cancellationToken);
+    }
+
+    public async Task ChangeStatusAsync(int orderId, string status, CancellationToken cancellationToken = default)
+    {
+        if (!AllowedStatuses.Contains(status))
+        {
+            throw new ConflictException($"Invalid order status \"{status}\".");
+        }
+
+        var order = await _context.Orders.FindAsync([orderId], cancellationToken)
+            ?? throw new NotFoundException(nameof(Order), orderId);
+
+        order.Status = status;
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
     private async Task<IEnumerable<OrderDto>> QueryToDtoAsync(IQueryable<Order> query, CancellationToken cancellationToken)

@@ -26,6 +26,7 @@ public class ProductService : IProductService
                 Stock = p.Stock,
                 Price = p.Price,
                 Imageurl = p.Imageurl,
+                Category = p.Category,
                 SellerId = p.SellerId
             })
             .ToListAsync(cancellationToken);
@@ -49,6 +50,7 @@ public class ProductService : IProductService
                 Stock = p.Stock,
                 Price = p.Price,
                 Imageurl = p.Imageurl,
+                Category = p.Category,
                 SellerId = p.SellerId
             })
             .ToListAsync(cancellationToken);
@@ -63,6 +65,7 @@ public class ProductService : IProductService
             Stock = dto.Stock,
             Price = dto.Price,
             Imageurl = dto.Imageurl,
+            Category = dto.Category,
             SellerId = sellerId
         };
 
@@ -82,6 +85,7 @@ public class ProductService : IProductService
         product.Stock = dto.Stock;
         product.Price = dto.Price;
         product.Imageurl = dto.Imageurl;
+        product.Category = dto.Category;
 
         await _context.SaveChangesAsync(cancellationToken);
     }
@@ -117,6 +121,7 @@ public class ProductService : IProductService
         Stock = p.Stock,
         Price = p.Price,
         Imageurl = p.Imageurl,
+        Category = p.Category,
         SellerId = p.SellerId
     };
 }

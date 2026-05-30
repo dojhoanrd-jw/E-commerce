@@ -25,6 +25,7 @@ export class AdminDashboardComponent implements OnInit {
 
   readonly revenue = computed(() => this.orders().reduce((sum, o) => sum + o.total, 0));
   readonly roles: UserRole[] = ['Buyer', 'Seller', 'Admin'];
+  readonly orderStatuses = ['Pending', 'Shipped', 'Delivered', 'Cancelled'];
 
   ngOnInit(): void {
     this.productsService.getProduct().subscribe({ next: (d) => this.products.set(d) });
@@ -64,6 +65,17 @@ export class AdminDashboardComponent implements OnInit {
       next: () => {
         this.notification.success('Usuario eliminado');
         this.users.update((list) => list.filter((u) => u.id !== user.id));
+      }
+    });
+  }
+
+  changeStatus(order: Order, status: string): void {
+    this.admin.changeOrderStatus(order.id, status).subscribe({
+      next: () => {
+        this.notification.success(`Orden #${order.id} → ${status}`);
+        this.orders.update((list) =>
+          list.map((o) => (o.id === order.id ? { ...o, status } : o))
+        );
       }
     });
   }

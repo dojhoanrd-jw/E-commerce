@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProductsService } from '@features/products/services/products.service';
+import { PRODUCT_CATEGORIES } from '@features/products/models/product.model';
 import { NotificationService } from '@core/services/notification.service';
 
 @Component({
@@ -18,6 +19,7 @@ export class ProductFormComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
+  readonly categories = PRODUCT_CATEGORIES;
   readonly saving = signal(false);
   readonly editId = signal<number | null>(null);
 
@@ -26,6 +28,7 @@ export class ProductFormComponent implements OnInit {
     description: [''],
     price: [0, [Validators.required, Validators.min(0)]],
     stock: [0, [Validators.required, Validators.min(0)]],
+    category: ['Electrónica', [Validators.required]],
     imageurl: ['', [Validators.required]]
   });
 
@@ -44,6 +47,7 @@ export class ProductFormComponent implements OnInit {
           description: p.description ?? '',
           price: p.price,
           stock: p.stock,
+          category: p.category,
           imageurl: p.imageurl
         })
     });

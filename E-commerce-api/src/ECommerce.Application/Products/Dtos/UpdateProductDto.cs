@@ -17,4 +17,8 @@ public class UpdateProductDto
     public decimal Price { get; set; }
 
     public string? Imageurl { get; set; }
+
+    [Required]
+    [MaxLength(50)]
+    public string Category { get; set; } = null!;
 }

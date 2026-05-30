@@ -9,4 +9,6 @@ public interface IOrderService
     Task<IEnumerable<OrderDto>> GetMyOrdersAsync(int userId, CancellationToken cancellationToken = default);
 
     Task<IEnumerable<OrderDto>> GetAllAsync(CancellationToken cancellationToken = default);
+
+    Task ChangeStatusAsync(int orderId, string status, CancellationToken cancellationToken = default);
 }

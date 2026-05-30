@@ -41,4 +41,13 @@ public class OrderController : ApiControllerBase
         var orders = await _orderService.GetAllAsync(cancellationToken);
         return Ok(orders);
     }
+
+    // PUT: api/order/5/status  (Admin only)
+    [Authorize(Roles = "Admin")]
+    [HttpPut("{id:int}/status")]
+    public async Task<IActionResult> UpdateStatus(int id, UpdateOrderStatusRequest request, CancellationToken cancellationToken)
+    {
+        await _orderService.ChangeStatusAsync(id, request.Status, cancellationToken);
+        return NoContent();
+    }
 }

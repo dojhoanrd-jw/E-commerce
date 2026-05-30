@@ -14,5 +14,7 @@ public class ProductDto
 
     public string? Imageurl { get; set; }
 
+    public string Category { get; set; } = null!;
+
     public int? SellerId { get; set; }
 }

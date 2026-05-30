@@ -28,6 +28,15 @@
     </div>
 
     <label class="field">
+      <span>Categoría</span>
+      <select formControlName="category">
+        @for (c of categories; track c) {
+          <option [value]="c">{{ c }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="field">
       <span>URL de imagen</span>
       <input type="text" formControlName="imageurl" placeholder="https://…" />
       @if (form.controls.imageurl.touched && form.controls.imageurl.invalid) {

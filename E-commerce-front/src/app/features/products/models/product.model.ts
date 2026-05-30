@@ -1,3 +1,12 @@
+export const PRODUCT_CATEGORIES = [
+  'Electrónica',
+  'Hogar',
+  'Ropa',
+  'Deportes',
+  'Juguetes',
+  'Otros'
+] as const;
+
 export interface Product {
   id: number;
   name: string;
@@ -5,6 +14,7 @@ export interface Product {
   price: number;
   stock: number;
   imageurl: string;
+  category: string;
   sellerId?: number | null;
 }
 
@@ -14,4 +24,5 @@ export interface ProductPayload {
   stock: number;
   price: number;
   imageurl: string;
+  category: string;
 }

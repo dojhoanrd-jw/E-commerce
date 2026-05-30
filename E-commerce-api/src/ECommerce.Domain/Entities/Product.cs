@@ -14,5 +14,7 @@ public class Product
 
     public string? Imageurl { get; set; }
 
+    public string Category { get; set; } = "Otros";
+
     public int? SellerId { get; set; }
 }

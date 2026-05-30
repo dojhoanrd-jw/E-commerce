@@ -10,24 +10,50 @@
 <section class="catalog" id="catalogo">
   <div class="catalog__head">
     <h2>Nuestros productos</h2>
-    @if (!loading) {
-      <span class="catalog__count">{{ products.length }} productos</span>
+    @if (!loading()) {
+      <span class="catalog__count">{{ filtered().length }} productos</span>
     }
   </div>
 
-  @if (loading) {
+  <div class="filters">
+    <input
+      class="filters__search"
+      type="text"
+      placeholder="Buscar por nombre…"
+      [ngModel]="search()"
+      (ngModelChange)="search.set($event)"
+    />
+    <select [ngModel]="category()" (ngModelChange)="category.set($event)">
+      <option value="">Todas las categorías</option>
+      @for (c of categories; track c) {
+        <option [value]="c">{{ c }}</option>
+      }
+    </select>
+    <input
+      class="filters__price"
+      type="number"
+      min="0"
+      placeholder="Precio máx."
+      [ngModel]="maxPrice()"
+      (ngModelChange)="maxPrice.set($event)"
+    />
+    <button class="filters__clear" type="button" (click)="clearFilters()">Limpiar</button>
+  </div>
+
+  @if (loading()) {
     <p class="muted">Cargando productos…</p>
-  } @else if (products.length === 0) {
-    <p class="muted">No hay productos disponibles.</p>
+  } @else if (filtered().length === 0) {
+    <p class="muted">No se encontraron productos.</p>
   } @else {
     <div class="products-grid">
-      @for (product of products; track product.id) {
+      @for (product of filtered(); track product.id) {
         <article class="product-card">
           <a class="product-card__link" [routerLink]="['/products', product.id]">
             <div class="image-container">
               <img [src]="product.imageurl" [alt]="product.name" class="product-image" />
             </div>
             <div class="product-info">
+              <span class="product-cat">{{ product.category }}</span>
               <h3 class="product-name">{{ product.name }}</h3>
               <p class="product-description">{{ product.description }}</p>
               <div class="product-details">
@@ -36,7 +62,9 @@
               </div>
             </div>
           </a>
-          <button class="btn add-btn" (click)="addToCart(product, $event)">Agregar al carrito</button>
+          <button class="btn add-btn" [disabled]="product.stock === 0" (click)="addToCart(product, $event)">
+            {{ product.stock === 0 ? 'Agotado' : 'Agregar al carrito' }}
+          </button>
         </article>
       }
     </div>
