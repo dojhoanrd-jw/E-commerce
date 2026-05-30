@@ -35,7 +35,7 @@
         <tbody>
           @for (item of o.items; track item.productId) {
             <tr>
-              <td>{{ item.productName }}</td>
+              <td>{{ item.productName }}@if (item.variantLabel) { <em class="variant-tag"> · {{ item.variantLabel }}</em> }</td>
               <td>{{ item.unitPrice | currency }}</td>
               <td>{{ item.quantity }}</td>
               <td>{{ item.unitPrice * item.quantity | currency }}</td>

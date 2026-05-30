@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CartService } from '@core/services/cart.service';
 import { PaymentService } from '@core/services/payment.service';
+import { CartItem } from '@core/models/cart.model';
 
 @Component({
   selector: 'app-cart',
@@ -18,16 +19,20 @@ export class CartComponent {
 
   readonly placing = signal(false);
 
-  changeQty(productId: number, value: number): void {
-    this.cart.setQuantity(productId, Number(value));
+  changeQty(item: CartItem, value: number): void {
+    this.cart.setQuantity(item.productId, item.variantId ?? null, Number(value));
   }
 
-  remove(productId: number): void {
-    this.cart.remove(productId);
+  remove(item: CartItem): void {
+    this.cart.remove(item.productId, item.variantId ?? null);
   }
 
   checkout(): void {
-    const items = this.cart.items().map((i) => ({ productId: i.productId, quantity: i.quantity }));
+    const items = this.cart.items().map((i) => ({
+      productId: i.productId,
+      quantity: i.quantity,
+      variantId: i.variantId ?? null
+    }));
     if (items.length === 0) {
       return;
     }
@@ -35,7 +40,6 @@ export class CartComponent {
     this.placing.set(true);
     this.payment.createCheckout(items).subscribe({
       next: (res) => {
-        // Redirect to the Stripe Checkout hosted page
         window.location.href = res.url;
       },
       error: () => this.placing.set(false)

@@ -54,6 +54,24 @@
       <textarea formControlName="imagesText" rows="3" placeholder="https://…&#10;https://…"></textarea>
     </label>
 
+    <div class="field">
+      <span>Variantes (talla / color, opcional)</span>
+      <small style="color: var(--color-muted); display: block; margin-bottom: 0.5rem;">
+        Si agregas variantes, el stock se maneja por cada una.
+      </small>
+
+      @for (variant of variants.controls; track $index) {
+        <div [formGroup]="$any(variant)" style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+          <input type="text" formControlName="size" placeholder="Talla" style="flex: 1; padding: 0.6rem; border: 1.5px solid var(--color-border); border-radius: 10px; font-family: inherit;" />
+          <input type="text" formControlName="color" placeholder="Color" style="flex: 1; padding: 0.6rem; border: 1.5px solid var(--color-border); border-radius: 10px; font-family: inherit;" />
+          <input type="number" min="0" formControlName="stock" placeholder="Stock" style="width: 90px; padding: 0.6rem; border: 1.5px solid var(--color-border); border-radius: 10px; font-family: inherit;" />
+          <button type="button" (click)="removeVariant($index)" aria-label="Quitar" style="border: 0; background: transparent; color: var(--color-error); font-size: 1.3rem; cursor: pointer;">&times;</button>
+        </div>
+      }
+
+      <button type="button" class="link" (click)="addVariant()">+ Agregar variante</button>
+    </div>
+
     <button class="btn" type="submit" [disabled]="saving()">
       {{ saving() ? 'Guardando…' : (editId() ? 'Guardar cambios' : 'Crear producto') }}
     </button>

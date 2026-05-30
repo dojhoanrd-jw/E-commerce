@@ -9,11 +9,14 @@
   } @else {
     <div class="cart">
       <div class="cart__list">
-        @for (item of cart.items(); track item.productId) {
+        @for (item of cart.items(); track item.productId + '-' + (item.variantId ?? 0)) {
           <div class="cart-row">
             <img [src]="item.imageurl" [alt]="item.name" class="cart-row__img" />
             <div class="cart-row__info">
               <strong>{{ item.name }}</strong>
+              @if (item.variantLabel) {
+                <span class="cart-row__variant">{{ item.variantLabel }}</span>
+              }
               <span class="cart-row__price">{{ item.price | currency }}</span>
             </div>
             <input
@@ -21,10 +24,10 @@
               min="1"
               class="qty-input"
               [ngModel]="item.quantity"
-              (ngModelChange)="changeQty(item.productId, $event)"
+              (ngModelChange)="changeQty(item, $event)"
             />
             <span class="cart-row__subtotal">{{ item.price * item.quantity | currency }}</span>
-            <button class="cart-row__remove" (click)="remove(item.productId)" aria-label="Quitar">&times;</button>
+            <button class="cart-row__remove" (click)="remove(item)" aria-label="Quitar">&times;</button>
           </div>
         }
       </div>

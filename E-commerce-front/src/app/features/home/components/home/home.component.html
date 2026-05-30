@@ -121,12 +121,16 @@
                         <span class="price-old">{{ product.price | currency }}</span>
                       }
                     </span>
-                    <span class="stock">Stock: {{ product.stock }}</span>
+                    <span class="stock">Stock: {{ totalStock(product) }}</span>
                   </div>
                 </div>
               </a>
-              <button class="btn add-btn" [disabled]="product.stock === 0" (click)="addToCart(product, $event)">
-                {{ product.stock === 0 ? 'Agotado' : 'Agregar al carrito' }}
+              <button
+                class="btn add-btn"
+                [disabled]="!hasVariants(product) && product.stock === 0"
+                (click)="addToCart(product, $event)"
+              >
+                {{ hasVariants(product) ? 'Elegir opciones' : (product.stock === 0 ? 'Agotado' : 'Agregar al carrito') }}
               </button>
             </article>
           }

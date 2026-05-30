@@ -71,6 +71,58 @@
   align-items: stretch;
 }
 
+.variants {
+  margin: 1rem 0;
+}
+
+.variants__label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-ink-soft);
+  margin-bottom: 0.5rem;
+}
+
+.variants__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.variant {
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.variant small {
+  color: var(--color-muted);
+  font-weight: 500;
+}
+
+.variant:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+
+.variant--active {
+  border-color: var(--color-primary);
+  background: rgba(42, 157, 143, 0.1);
+  color: var(--color-primary-dark);
+}
+
+.variant:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
 .qty-input {
   width: 80px;
   padding: 0.85rem;

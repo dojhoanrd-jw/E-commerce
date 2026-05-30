@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ProductsService } from '@features/products/services/products.service';
-import { Product, effectivePrice } from '@features/products/models/product.model';
+import { Product, Variant, effectivePrice, variantLabel } from '@features/products/models/product.model';
 import { CartService } from '@core/services/cart.service';
 import { WishlistService } from '@core/services/wishlist.service';
 import { NotificationService } from '@core/services/notification.service';
@@ -29,6 +29,19 @@ export class ProductDetailComponent implements OnInit {
   readonly product = signal<Product | null>(null);
   readonly loading = signal(true);
   quantity = 1;
+
+  readonly selectedVariant = signal<Variant | null>(null);
+  readonly hasVariants = computed(() => (this.product()?.variants?.length ?? 0) > 0);
+  readonly availableStock = computed(() => {
+    const p = this.product();
+    if (!p) {
+      return 0;
+    }
+    if (p.variants.length > 0) {
+      return this.selectedVariant()?.stock ?? 0;
+    }
+    return p.stock;
+  });
 
   readonly selectedImage = signal<string>('');
   readonly related = signal<Product[]>([]);
@@ -97,8 +110,20 @@ export class ProductDetailComponent implements OnInit {
     if (!p) {
       return;
     }
-    this.cart.add(p, this.quantity);
+    if (p.variants.length > 0 && !this.selectedVariant()) {
+      this.notification.error('Selecciona una opción (talla/color) primero.');
+      return;
+    }
+    this.cart.add(p, this.quantity, this.selectedVariant());
     this.notification.success(`${p.name} agregado al carrito`);
+  }
+
+  selectVariant(v: Variant): void {
+    this.selectedVariant.set(v);
+  }
+
+  label(v: Variant): string {
+    return variantLabel(v);
   }
 
   toggleWishlist(): void {

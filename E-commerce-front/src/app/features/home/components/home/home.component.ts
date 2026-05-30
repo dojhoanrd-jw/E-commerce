@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ProductsService } from '@features/products/services/products.service';
 import { Product, PRODUCT_CATEGORIES, effectivePrice } from '@features/products/models/product.model';
 import { CartService } from '@core/services/cart.service';
@@ -20,6 +20,7 @@ export class HomeComponent implements OnInit {
   private readonly cart = inject(CartService);
   readonly wishlist = inject(WishlistService);
   private readonly notification = inject(NotificationService);
+  private readonly router = inject(Router);
 
   readonly categories = PRODUCT_CATEGORIES;
   readonly allProducts = signal<Product[]>([]);
@@ -76,8 +77,23 @@ export class HomeComponent implements OnInit {
 
   addToCart(product: Product, event: Event): void {
     event.stopPropagation();
+    if (product.variants.length > 0) {
+      this.router.navigate(['/products', product.id]);
+      return;
+    }
     this.cart.add(product);
     this.notification.success(`${product.name} agregado al carrito`);
+  }
+
+  hasVariants(product: Product): boolean {
+    return product.variants.length > 0;
+  }
+
+  totalStock(product: Product): number {
+    if (product.variants.length > 0) {
+      return product.variants.reduce((sum, v) => sum + v.stock, 0);
+    }
+    return product.stock;
   }
 
   toggleWishlist(product: Product, event: Event): void {

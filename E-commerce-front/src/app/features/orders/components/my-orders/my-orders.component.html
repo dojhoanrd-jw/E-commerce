@@ -23,7 +23,7 @@
           <ul class="order-items">
             @for (item of order.items; track item.productId) {
               <li>
-                <span>{{ item.quantity }} × {{ item.productName }}</span>
+                <span>{{ item.quantity }} × {{ item.productName }}@if (item.variantLabel) { <em class="variant-tag"> · {{ item.variantLabel }}</em> }</span>
                 <span>{{ item.unitPrice * item.quantity | currency }}</span>
               </li>
             }

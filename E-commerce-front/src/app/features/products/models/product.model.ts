@@ -7,6 +7,19 @@ export const PRODUCT_CATEGORIES = [
   'Otros'
 ] as const;
 
+export interface Variant {
+  id: number;
+  size?: string | null;
+  color?: string | null;
+  stock: number;
+}
+
+export interface VariantPayload {
+  size?: string | null;
+  color?: string | null;
+  stock: number;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -21,6 +34,7 @@ export interface Product {
   averageRating: number;
   reviewCount: number;
   salesCount: number;
+  variants: Variant[];
 }
 
 export interface ProductPayload {
@@ -32,8 +46,13 @@ export interface ProductPayload {
   imageurl: string;
   images: string[];
   category: string;
+  variants: VariantPayload[];
 }
 
 export function effectivePrice(p: Product): number {
   return p.salePrice ?? p.price;
+}
+
+export function variantLabel(v: Variant): string {
+  return [v.size, v.color].filter((s) => !!s && s.trim().length > 0).join(' · ');
 }

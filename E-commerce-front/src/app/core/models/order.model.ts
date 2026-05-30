@@ -1,6 +1,7 @@
 export interface OrderItem {
   productId: number;
   productName: string;
+  variantLabel?: string | null;
   unitPrice: number;
   quantity: number;
 }
@@ -18,4 +19,5 @@ export interface Order {
 export interface CreateOrderItem {
   productId: number;
   quantity: number;
+  variantId?: number | null;
 }

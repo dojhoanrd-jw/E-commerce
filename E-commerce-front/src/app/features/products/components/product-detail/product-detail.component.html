@@ -42,19 +42,45 @@
               <span class="detail__price-old">{{ p.price | currency }}</span>
             }
           </div>
-          <div class="detail__stock">Stock disponible: {{ p.stock }}</div>
+          @if (hasVariants()) {
+            <div class="variants">
+              <span class="variants__label">Elige una opción</span>
+              <div class="variants__options">
+                @for (v of p.variants; track v.id) {
+                  <button
+                    class="variant"
+                    [class.variant--active]="selectedVariant()?.id === v.id"
+                    [disabled]="v.stock === 0"
+                    (click)="selectVariant(v)"
+                    type="button"
+                  >
+                    {{ label(v) }} <small>({{ v.stock }})</small>
+                  </button>
+                }
+              </div>
+            </div>
+            <div class="detail__stock">
+              {{ selectedVariant() ? 'Stock disponible: ' + availableStock() : 'Selecciona una opción arriba' }}
+            </div>
+          } @else {
+            <div class="detail__stock">Stock disponible: {{ p.stock }}</div>
+          }
 
           <div class="detail__actions">
             <input
               type="number"
               min="1"
-              [max]="p.stock"
+              [max]="availableStock()"
               [(ngModel)]="quantity"
               class="qty-input"
-              [disabled]="p.stock === 0"
+              [disabled]="availableStock() === 0"
             />
-            <button class="btn" [disabled]="p.stock === 0" (click)="addToCart()">
-              {{ p.stock === 0 ? 'Sin stock' : 'Agregar al carrito' }}
+            <button
+              class="btn"
+              [disabled]="(hasVariants() && !selectedVariant()) || availableStock() === 0"
+              (click)="addToCart()"
+            >
+              {{ hasVariants() && !selectedVariant() ? 'Elige una opción' : (availableStock() === 0 ? 'Sin stock' : 'Agregar al carrito') }}
             </button>
             <button class="heart-btn" type="button" (click)="toggleWishlist()" aria-label="Favorito">
               {{ wishlist.has(p.id) ? '♥' : '♡' }}

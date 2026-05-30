@@ -1,9 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Observable } from 'rxjs';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProductsService } from '@features/products/services/products.service';
-import { PRODUCT_CATEGORIES, ProductPayload } from '@features/products/models/product.model';
+import { PRODUCT_CATEGORIES, ProductPayload, Variant } from '@features/products/models/product.model';
 import { NotificationService } from '@core/services/notification.service';
 
 @Component({
@@ -34,6 +34,8 @@ export class ProductFormComponent implements OnInit {
     imagesText: ['']
   });
 
+  readonly variants = this.fb.array<FormGroup>([]);
+
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
@@ -43,7 +45,7 @@ export class ProductFormComponent implements OnInit {
     const idNum = Number(id);
     this.editId.set(idNum);
     this.productsService.getById(idNum).subscribe({
-      next: (p) =>
+      next: (p) => {
         this.form.patchValue({
           name: p.name,
           description: p.description ?? '',
@@ -53,8 +55,27 @@ export class ProductFormComponent implements OnInit {
           category: p.category,
           imageurl: p.imageurl,
           imagesText: (p.images ?? []).join('\n')
-        })
+        });
+        this.variants.clear();
+        (p.variants ?? []).forEach((v) => this.variants.push(this.variantGroup(v)));
+      }
     });
+  }
+
+  private variantGroup(v?: Partial<Variant>): FormGroup {
+    return this.fb.group({
+      size: [v?.size ?? ''],
+      color: [v?.color ?? ''],
+      stock: [v?.stock ?? 0, [Validators.min(0)]]
+    });
+  }
+
+  addVariant(): void {
+    this.variants.push(this.variantGroup());
+  }
+
+  removeVariant(index: number): void {
+    this.variants.removeAt(index);
   }
 
   submit(): void {
@@ -71,6 +92,15 @@ export class ProductFormComponent implements OnInit {
       .map((s) => s.trim())
       .filter((s) => s.length > 0);
 
+    const variants = this.variants.controls
+      .map((c) => c.value)
+      .filter((v) => (v.size && v.size.trim()) || (v.color && v.color.trim()))
+      .map((v) => ({
+        size: v.size?.trim() || null,
+        color: v.color?.trim() || null,
+        stock: Number(v.stock) || 0
+      }));
+
     const payload: ProductPayload = {
       name: raw.name,
       description: raw.description,
@@ -79,7 +109,8 @@ export class ProductFormComponent implements OnInit {
       stock: raw.stock,
       category: raw.category,
       imageurl: raw.imageurl,
-      images
+      images,
+      variants
     };
 
     const id = this.editId();
