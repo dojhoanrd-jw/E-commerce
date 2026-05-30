@@ -1,59 +1,78 @@
-# ECommerce
+# E-commerce — Frontend (Angular)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.1.4.
+Single Page Application built with **Angular 19** (standalone components). It is the
+frontend of a full-stack e-commerce project and consumes the REST API to display the
+product catalog.
 
-## Development server
+> Part of the monorepo: `E-commerce-front` (this app), `E-commerce-api` (ASP.NET Core 8)
+> and `E-commerce-db` (PostgreSQL schema & seed).
 
-To start a local development server, run:
+## Tech stack
 
-```bash
-ng serve
+- Angular 19 (standalone components, lazy-loaded routes)
+- TypeScript
+- RxJS / HttpClient
+- Deployed as a static site on **Vercel**
+
+## Project structure (feature / domain)
+
+```
+src/app/
+├── core/                  # app-wide singletons (interceptors, guards) — reserved
+├── shared/                # reusable UI, pipes, directives — reserved
+├── features/
+│   └── products/          # products domain
+│       ├── components/    # UI components
+│       ├── services/      # data access
+│       ├── models/        # types
+│       └── products.routes.ts
+├── app.component.ts
+├── app.config.ts          # provideRouter + provideHttpClient
+└── app.routes.ts          # lazy loads each feature
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Path aliases are configured in `tsconfig.json`: `@features/*`, `@core/*`,
+`@shared/*`, `@environments/*`.
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Getting started
 
 ```bash
-ng generate --help
+npm install
+npm start          # dev server at http://localhost:4200
 ```
 
-## Building
+## Configuration
 
-To build the project run:
+The API base URL lives in the environment files:
+
+- `src/environments/environment.ts` — development
+- `src/environments/environment.prod.ts` — production (used by `ng build`)
+
+```ts
+export const environment = {
+  production: true,
+  apiUrl: 'https://your-api-host/api'
+};
+```
+
+## Build
 
 ```bash
-ng build
+npm run build      # outputs to dist/e-commerce/browser
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+On Vercel set **Output Directory** to `dist/e-commerce/browser`.
 
-## Running unit tests
+## Adding a new feature
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+1. Create `features/<name>/` with its `components/`, `services/`, `models/` and
+   `<name>.routes.ts`.
+2. Register it in `app.routes.ts`:
 
-```bash
-ng test
+```ts
+{
+  path: '<name>',
+  loadChildren: () =>
+    import('@features/<name>/<name>.routes').then((m) => m.<NAME>_ROUTES)
+}
 ```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
