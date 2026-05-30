@@ -1,25 +1,27 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+# Build context is the repository root (Render: Root Directory empty, Dockerfile Path ./E-commerce-api/Dockerfile)
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
 WORKDIR /app
 EXPOSE 8080
-EXPOSE 8081
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["E-commerce-api/E-commerce-api.csproj", "E-commerce-api/"]
-RUN dotnet restore "./E-commerce-api/E-commerce-api.csproj"
-COPY . .
-WORKDIR "/src/E-commerce-api"
-RUN dotnet build "./E-commerce-api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./E-commerce-api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+# Copy csproj files first and restore (better layer caching)
+COPY ["E-commerce-api/src/ECommerce.Domain/ECommerce.Domain.csproj", "E-commerce-api/src/ECommerce.Domain/"]
+COPY ["E-commerce-api/src/ECommerce.Application/ECommerce.Application.csproj", "E-commerce-api/src/ECommerce.Application/"]
+COPY ["E-commerce-api/src/ECommerce.Infrastructure/ECommerce.Infrastructure.csproj", "E-commerce-api/src/ECommerce.Infrastructure/"]
+COPY ["E-commerce-api/src/ECommerce.Api/ECommerce.Api.csproj", "E-commerce-api/src/ECommerce.Api/"]
+RUN dotnet restore "E-commerce-api/src/ECommerce.Api/ECommerce.Api.csproj"
+
+# Copy the rest of the source and publish
+COPY . .
+RUN dotnet publish "E-commerce-api/src/ECommerce.Api/ECommerce.Api.csproj" \
+    -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "E-commerce-api.dll"]
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "ECommerce.Api.dll"]

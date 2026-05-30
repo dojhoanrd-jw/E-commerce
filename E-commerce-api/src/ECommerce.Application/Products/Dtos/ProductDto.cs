@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+namespace ECommerce.Application.Products.Dtos;
 
-namespace E_commerce_api.Models;
-
-public partial class Product
+public class ProductDto
 {
     public int Id { get; set; }
 
