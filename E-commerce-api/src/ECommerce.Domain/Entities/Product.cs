@@ -21,4 +21,6 @@ public class Product
     public string Category { get; set; } = "Otros";
 
     public int? SellerId { get; set; }
+
+    public List<ProductVariant> Variants { get; set; } = new();
 }

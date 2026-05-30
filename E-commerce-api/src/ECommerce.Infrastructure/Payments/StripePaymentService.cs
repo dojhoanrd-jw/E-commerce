@@ -27,23 +27,44 @@ public class StripePaymentService : IPaymentService
 
     public async Task<string> CreateCheckoutSessionAsync(int userId, CreateOrderRequest request, CancellationToken cancellationToken = default)
     {
-        var requested = request.Items
-            .GroupBy(i => i.ProductId)
-            .ToDictionary(g => g.Key, g => g.Sum(x => x.Quantity));
+        var grouped = request.Items
+            .GroupBy(i => new { i.ProductId, i.VariantId })
+            .Select(g => new { g.Key.ProductId, g.Key.VariantId, Quantity = g.Sum(x => x.Quantity) })
+            .ToList();
 
-        var productIds = requested.Keys.ToList();
+        var productIds = grouped.Select(g => g.ProductId).Distinct().ToList();
         var products = await _context.Products
+            .Include(p => p.Variants)
             .Where(p => productIds.Contains(p.Id))
             .ToListAsync(cancellationToken);
 
         var lineItems = new List<SessionLineItemOptions>();
 
-        foreach (var (productId, quantity) in requested)
+        foreach (var item in grouped)
         {
-            var product = products.FirstOrDefault(p => p.Id == productId)
-                ?? throw new NotFoundException("Product", productId);
+            var product = products.FirstOrDefault(p => p.Id == item.ProductId)
+                ?? throw new NotFoundException("Product", item.ProductId);
 
-            if (product.Stock < quantity)
+            var name = product.Name;
+
+            if (item.VariantId.HasValue)
+            {
+                var variant = product.Variants.FirstOrDefault(v => v.Id == item.VariantId.Value)
+                    ?? throw new NotFoundException("ProductVariant", item.VariantId.Value);
+
+                if (variant.Stock < item.Quantity)
+                {
+                    throw new ConflictException(
+                        $"Not enough stock for \"{product.Name}\" (available: {variant.Stock}).");
+                }
+
+                var label = VariantLabel(variant);
+                if (label.Length > 0)
+                {
+                    name = $"{product.Name} ({label})";
+                }
+            }
+            else if (product.Stock < item.Quantity)
             {
                 throw new ConflictException(
                     $"Not enough stock for \"{product.Name}\" (available: {product.Stock}).");
@@ -57,15 +78,15 @@ public class StripePaymentService : IPaymentService
                     UnitAmount = (long)((product.SalePrice ?? product.Price) * 100),
                     ProductData = new SessionLineItemPriceDataProductDataOptions
                     {
-                        Name = product.Name
+                        Name = name
                     }
                 },
-                Quantity = quantity
+                Quantity = item.Quantity
             });
         }
 
-        var itemsForMetadata = requested
-            .Select(kv => new CreateOrderItemDto { ProductId = kv.Key, Quantity = kv.Value })
+        var itemsForMetadata = grouped
+            .Select(g => new CreateOrderItemDto { ProductId = g.ProductId, Quantity = g.Quantity, VariantId = g.VariantId })
             .ToList();
 
         var options = new SessionCreateOptions
@@ -108,5 +129,19 @@ public class StripePaymentService : IPaymentService
         var request = new CreateOrderRequest { Items = items };
 
         return await _orderService.CreateAsync(userId, request, sessionId, cancellationToken);
+    }
+
+    private static string VariantLabel(ProductVariant v)
+    {
+        var parts = new List<string>();
+        if (!string.IsNullOrWhiteSpace(v.Size))
+        {
+            parts.Add(v.Size);
+        }
+        if (!string.IsNullOrWhiteSpace(v.Color))
+        {
+            parts.Add(v.Color);
+        }
+        return string.Join(" · ", parts);
     }
 }

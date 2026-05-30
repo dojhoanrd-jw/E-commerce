@@ -23,6 +23,8 @@ public class OrderItemDto
 
     public string ProductName { get; set; } = null!;
 
+    public string? VariantLabel { get; set; }
+
     public decimal UnitPrice { get; set; }
 
     public int Quantity { get; set; }

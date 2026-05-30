@@ -7,6 +7,8 @@ public interface IAppDbContext
 {
     DbSet<Product> Products { get; }
 
+    DbSet<ProductVariant> ProductVariants { get; }
+
     DbSet<User> Users { get; }
 
     DbSet<Order> Orders { get; }

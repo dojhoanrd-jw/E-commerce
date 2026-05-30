@@ -29,33 +29,18 @@ public class OrderService : IOrderService
 
             if (existing is not null)
             {
-                return new OrderDto
-                {
-                    Id = existing.Id,
-                    UserId = existing.UserId,
-                    UserName = string.Empty,
-                    CreatedAt = existing.CreatedAt,
-                    Total = existing.Total,
-                    Status = existing.Status,
-                    Items = existing.Items
-                        .Select(i => new OrderItemDto
-                        {
-                            ProductId = i.ProductId,
-                            ProductName = i.ProductName,
-                            UnitPrice = i.UnitPrice,
-                            Quantity = i.Quantity
-                        })
-                        .ToList()
-                };
+                return BuildDto(existing);
             }
         }
 
-        var requested = request.Items
-            .GroupBy(i => i.ProductId)
-            .ToDictionary(g => g.Key, g => g.Sum(x => x.Quantity));
+        var grouped = request.Items
+            .GroupBy(i => new { i.ProductId, i.VariantId })
+            .Select(g => new { g.Key.ProductId, g.Key.VariantId, Quantity = g.Sum(x => x.Quantity) })
+            .ToList();
 
-        var productIds = requested.Keys.ToList();
+        var productIds = grouped.Select(g => g.ProductId).Distinct().ToList();
         var products = await _context.Products
+            .Include(p => p.Variants)
             .Where(p => productIds.Contains(p.Id))
             .ToListAsync(cancellationToken);
 
@@ -67,25 +52,46 @@ public class OrderService : IOrderService
             StripeSessionId = stripeSessionId
         };
 
-        foreach (var (productId, quantity) in requested)
+        foreach (var item in grouped)
         {
-            var product = products.FirstOrDefault(p => p.Id == productId)
-                ?? throw new NotFoundException(nameof(Product), productId);
+            var product = products.FirstOrDefault(p => p.Id == item.ProductId)
+                ?? throw new NotFoundException(nameof(Product), item.ProductId);
 
-            if (product.Stock < quantity)
+            string? variantLabel = null;
+
+            if (item.VariantId.HasValue)
             {
-                throw new ConflictException(
-                    $"Not enough stock for \"{product.Name}\" (available: {product.Stock}).");
-            }
+                var variant = product.Variants.FirstOrDefault(v => v.Id == item.VariantId.Value)
+                    ?? throw new NotFoundException(nameof(ProductVariant), item.VariantId.Value);
 
-            product.Stock -= quantity;
+                if (variant.Stock < item.Quantity)
+                {
+                    throw new ConflictException(
+                        $"Not enough stock for \"{product.Name}\" ({Label(variant)}) (available: {variant.Stock}).");
+                }
+
+                variant.Stock -= item.Quantity;
+                variantLabel = Label(variant);
+            }
+            else
+            {
+                if (product.Stock < item.Quantity)
+                {
+                    throw new ConflictException(
+                        $"Not enough stock for \"{product.Name}\" (available: {product.Stock}).");
+                }
+
+                product.Stock -= item.Quantity;
+            }
 
             order.Items.Add(new OrderItem
             {
                 ProductId = product.Id,
                 ProductName = product.Name,
+                VariantId = item.VariantId,
+                VariantLabel = variantLabel,
                 UnitPrice = product.SalePrice ?? product.Price,
-                Quantity = quantity
+                Quantity = item.Quantity
             });
         }
 
@@ -94,24 +100,7 @@ public class OrderService : IOrderService
         _context.Orders.Add(order);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return new OrderDto
-        {
-            Id = order.Id,
-            UserId = order.UserId,
-            UserName = string.Empty,
-            CreatedAt = order.CreatedAt,
-            Total = order.Total,
-            Status = order.Status,
-            Items = order.Items
-                .Select(i => new OrderItemDto
-                {
-                    ProductId = i.ProductId,
-                    ProductName = i.ProductName,
-                    UnitPrice = i.UnitPrice,
-                    Quantity = i.Quantity
-                })
-                .ToList()
-        };
+        return BuildDto(order);
     }
 
     public Task<IEnumerable<OrderDto>> GetMyOrdersAsync(int userId, CancellationToken cancellationToken = default)
@@ -151,6 +140,40 @@ public class OrderService : IOrderService
         await _context.SaveChangesAsync(cancellationToken);
     }
 
+    private static string Label(ProductVariant v)
+    {
+        var parts = new List<string>();
+        if (!string.IsNullOrWhiteSpace(v.Size))
+        {
+            parts.Add(v.Size);
+        }
+        if (!string.IsNullOrWhiteSpace(v.Color))
+        {
+            parts.Add(v.Color);
+        }
+        return string.Join(" · ", parts);
+    }
+
+    private static OrderDto BuildDto(Order order) => new()
+    {
+        Id = order.Id,
+        UserId = order.UserId,
+        UserName = string.Empty,
+        CreatedAt = order.CreatedAt,
+        Total = order.Total,
+        Status = order.Status,
+        Items = order.Items
+            .Select(i => new OrderItemDto
+            {
+                ProductId = i.ProductId,
+                ProductName = i.ProductName,
+                VariantLabel = i.VariantLabel,
+                UnitPrice = i.UnitPrice,
+                Quantity = i.Quantity
+            })
+            .ToList()
+    };
+
     private async Task<IEnumerable<OrderDto>> QueryToDtoAsync(IQueryable<Order> query, CancellationToken cancellationToken)
     {
         return await query
@@ -171,6 +194,7 @@ public class OrderService : IOrderService
                     {
                         ProductId = i.ProductId,
                         ProductName = i.ProductName,
+                        VariantLabel = i.VariantLabel,
                         UnitPrice = i.UnitPrice,
                         Quantity = i.Quantity
                     })

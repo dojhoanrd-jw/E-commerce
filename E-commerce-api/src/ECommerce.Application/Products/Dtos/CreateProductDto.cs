@@ -26,4 +26,6 @@ public class CreateProductDto
     [Required]
     [MaxLength(50)]
     public string Category { get; set; } = null!;
+
+    public List<CreateVariantDto> Variants { get; set; } = new();
 }

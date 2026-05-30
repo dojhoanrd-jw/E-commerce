@@ -13,6 +13,8 @@ public class AppDbContext : DbContext, IAppDbContext
 
     public DbSet<Product> Products => Set<Product>();
 
+    public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
+
     public DbSet<User> Users => Set<User>();
 
     public DbSet<Order> Orders => Set<Order>();
@@ -38,6 +40,23 @@ public class AppDbContext : DbContext, IAppDbContext
             entity.Property(e => e.Images).HasColumnName("images");
             entity.Property(e => e.Category).HasMaxLength(50).HasColumnName("category");
             entity.Property(e => e.SellerId).HasColumnName("seller_id");
+
+            entity.HasMany(e => e.Variants)
+                .WithOne()
+                .HasForeignKey(v => v.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ProductVariant>(entity =>
+        {
+            entity.ToTable("product_variants");
+            entity.HasKey(e => e.Id).HasName("product_variants_pkey");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.Size).HasMaxLength(50).HasColumnName("size");
+            entity.Property(e => e.Color).HasMaxLength(50).HasColumnName("color");
+            entity.Property(e => e.Stock).HasColumnName("stock");
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -85,6 +104,8 @@ public class AppDbContext : DbContext, IAppDbContext
             entity.Property(e => e.ProductName).HasMaxLength(255).HasColumnName("product_name");
             entity.Property(e => e.UnitPrice).HasPrecision(10, 2).HasColumnName("unit_price");
             entity.Property(e => e.Quantity).HasColumnName("quantity");
+            entity.Property(e => e.VariantId).HasColumnName("variant_id");
+            entity.Property(e => e.VariantLabel).HasMaxLength(120).HasColumnName("variant_label");
         });
 
         modelBuilder.Entity<Review>(entity =>

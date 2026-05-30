@@ -17,53 +17,25 @@ public class ProductService : IProductService
 
     public async Task<IEnumerable<ProductDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await _context.Products
-            .Select(p => new ProductDto
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                Stock = p.Stock,
-                Price = p.Price,
-                SalePrice = p.SalePrice,
-                Imageurl = p.Imageurl,
-                Images = p.Images,
-                Category = p.Category,
-                SellerId = p.SellerId,
-                AverageRating = _context.Reviews.Where(r => r.ProductId == p.Id).Select(r => (double?)r.Rating).Average() ?? 0,
-                ReviewCount = _context.Reviews.Count(r => r.ProductId == p.Id),
-                SalesCount = _context.OrderItems.Where(oi => oi.ProductId == p.Id).Select(oi => (int?)oi.Quantity).Sum() ?? 0
-            })
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task<ProductDto> GetByIdAsync(int id, CancellationToken cancellationToken = default)
-    {
-        var product = await FindOrThrowAsync(id, cancellationToken);
-        return MapToDto(product);
+        return await _context.Products.Select(Projection()).ToListAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<ProductDto>> GetBySellerAsync(int sellerId, CancellationToken cancellationToken = default)
     {
         return await _context.Products
             .Where(p => p.SellerId == sellerId)
-            .Select(p => new ProductDto
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                Stock = p.Stock,
-                Price = p.Price,
-                SalePrice = p.SalePrice,
-                Imageurl = p.Imageurl,
-                Images = p.Images,
-                Category = p.Category,
-                SellerId = p.SellerId,
-                AverageRating = _context.Reviews.Where(r => r.ProductId == p.Id).Select(r => (double?)r.Rating).Average() ?? 0,
-                ReviewCount = _context.Reviews.Count(r => r.ProductId == p.Id),
-                SalesCount = _context.OrderItems.Where(oi => oi.ProductId == p.Id).Select(oi => (int?)oi.Quantity).Sum() ?? 0
-            })
+            .Select(Projection())
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<ProductDto> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var product = await _context.Products
+            .Include(p => p.Variants)
+            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken)
+            ?? throw new NotFoundException(nameof(Product), id);
+
+        return MapToDto(product);
     }
 
     public async Task<ProductDto> CreateAsync(CreateProductDto dto, int sellerId, CancellationToken cancellationToken = default)
@@ -78,7 +50,10 @@ public class ProductService : IProductService
             Imageurl = dto.Imageurl,
             Images = dto.Images,
             Category = dto.Category,
-            SellerId = sellerId
+            SellerId = sellerId,
+            Variants = dto.Variants
+                .Select(v => new ProductVariant { Size = v.Size, Color = v.Color, Stock = v.Stock })
+                .ToList()
         };
 
         _context.Products.Add(product);
@@ -89,7 +64,11 @@ public class ProductService : IProductService
 
     public async Task UpdateAsync(int id, UpdateProductDto dto, int userId, bool isAdmin, CancellationToken cancellationToken = default)
     {
-        var product = await FindOrThrowAsync(id, cancellationToken);
+        var product = await _context.Products
+            .Include(p => p.Variants)
+            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken)
+            ?? throw new NotFoundException(nameof(Product), id);
+
         EnsureCanManage(product, userId, isAdmin);
 
         product.Name = dto.Name;
@@ -101,22 +80,47 @@ public class ProductService : IProductService
         product.Images = dto.Images;
         product.Category = dto.Category;
 
+        product.Variants.Clear();
+        foreach (var v in dto.Variants)
+        {
+            product.Variants.Add(new ProductVariant { Size = v.Size, Color = v.Color, Stock = v.Stock });
+        }
+
         await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task DeleteAsync(int id, int userId, bool isAdmin, CancellationToken cancellationToken = default)
     {
-        var product = await FindOrThrowAsync(id, cancellationToken);
+        var product = await _context.Products.FindAsync([id], cancellationToken)
+            ?? throw new NotFoundException(nameof(Product), id);
+
         EnsureCanManage(product, userId, isAdmin);
 
         _context.Products.Remove(product);
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task<Product> FindOrThrowAsync(int id, CancellationToken cancellationToken)
+    private System.Linq.Expressions.Expression<Func<Product, ProductDto>> Projection()
     {
-        var product = await _context.Products.FindAsync([id], cancellationToken);
-        return product ?? throw new NotFoundException(nameof(Product), id);
+        return p => new ProductDto
+        {
+            Id = p.Id,
+            Name = p.Name,
+            Description = p.Description,
+            Stock = p.Stock,
+            Price = p.Price,
+            SalePrice = p.SalePrice,
+            Imageurl = p.Imageurl,
+            Images = p.Images,
+            Category = p.Category,
+            SellerId = p.SellerId,
+            AverageRating = _context.Reviews.Where(r => r.ProductId == p.Id).Select(r => (double?)r.Rating).Average() ?? 0,
+            ReviewCount = _context.Reviews.Count(r => r.ProductId == p.Id),
+            SalesCount = _context.OrderItems.Where(oi => oi.ProductId == p.Id).Select(oi => (int?)oi.Quantity).Sum() ?? 0,
+            Variants = p.Variants
+                .Select(v => new VariantDto { Id = v.Id, Size = v.Size, Color = v.Color, Stock = v.Stock })
+                .ToList()
+        };
     }
 
     private static void EnsureCanManage(Product product, int userId, bool isAdmin)
@@ -138,6 +142,9 @@ public class ProductService : IProductService
         Imageurl = p.Imageurl,
         Images = p.Images,
         Category = p.Category,
-        SellerId = p.SellerId
+        SellerId = p.SellerId,
+        Variants = p.Variants
+            .Select(v => new VariantDto { Id = v.Id, Size = v.Size, Color = v.Color, Stock = v.Stock })
+            .ToList()
     };
 }

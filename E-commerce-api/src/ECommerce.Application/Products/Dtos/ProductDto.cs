@@ -27,4 +27,6 @@ public class ProductDto
     public int ReviewCount { get; set; }
 
     public int SalesCount { get; set; }
+
+    public List<VariantDto> Variants { get; set; } = new();
 }
