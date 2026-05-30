@@ -1,3 +1,4 @@
+using ECommerce.Api.Handlers;
 using ECommerce.Application;
 using ECommerce.Infrastructure;
 
@@ -8,6 +9,10 @@ builder.Configuration.AddEnvironmentVariables();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Global exception handling -> consistent ProblemDetails responses
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 // CORS — allows one or more comma-separated origins from FRONTEND_URL
 var frontendUrl = Environment.GetEnvironmentVariable("FRONTEND_URL")
@@ -38,6 +43,8 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(connectionString);
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {

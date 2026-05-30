@@ -1,3 +1,4 @@
+using ECommerce.Application.Common.Exceptions;
 using ECommerce.Application.Common.Interfaces;
 using ECommerce.Application.Products.Dtos;
 using ECommerce.Domain.Entities;
@@ -29,10 +30,10 @@ public class ProductService : IProductService
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<ProductDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<ProductDto> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        var product = await _context.Products.FindAsync([id], cancellationToken);
-        return product is null ? null : MapToDto(product);
+        var product = await FindOrThrowAsync(id, cancellationToken);
+        return MapToDto(product);
     }
 
     public async Task<ProductDto> CreateAsync(CreateProductDto dto, CancellationToken cancellationToken = default)
@@ -52,13 +53,9 @@ public class ProductService : IProductService
         return MapToDto(product);
     }
 
-    public async Task<bool> UpdateAsync(int id, UpdateProductDto dto, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(int id, UpdateProductDto dto, CancellationToken cancellationToken = default)
     {
-        var product = await _context.Products.FindAsync([id], cancellationToken);
-        if (product is null)
-        {
-            return false;
-        }
+        var product = await FindOrThrowAsync(id, cancellationToken);
 
         product.Name = dto.Name;
         product.Description = dto.Description;
@@ -67,20 +64,20 @@ public class ProductService : IProductService
         product.Imageurl = dto.Imageurl;
 
         await _context.SaveChangesAsync(cancellationToken);
-        return true;
     }
 
-    public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
-        var product = await _context.Products.FindAsync([id], cancellationToken);
-        if (product is null)
-        {
-            return false;
-        }
+        var product = await FindOrThrowAsync(id, cancellationToken);
 
         _context.Products.Remove(product);
         await _context.SaveChangesAsync(cancellationToken);
-        return true;
+    }
+
+    private async Task<Product> FindOrThrowAsync(int id, CancellationToken cancellationToken)
+    {
+        var product = await _context.Products.FindAsync([id], cancellationToken);
+        return product ?? throw new NotFoundException(nameof(Product), id);
     }
 
     private static ProductDto MapToDto(Product p) => new()

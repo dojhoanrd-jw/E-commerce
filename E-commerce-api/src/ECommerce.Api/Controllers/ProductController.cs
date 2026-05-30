@@ -28,7 +28,7 @@ public class ProductController : ControllerBase
     public async Task<ActionResult<ProductDto>> GetProduct(int id, CancellationToken cancellationToken)
     {
         var product = await _productService.GetByIdAsync(id, cancellationToken);
-        return product is null ? NotFound() : Ok(product);
+        return Ok(product);
     }
 
     // POST: api/product
@@ -43,15 +43,15 @@ public class ProductController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateProduct(int id, UpdateProductDto dto, CancellationToken cancellationToken)
     {
-        var updated = await _productService.UpdateAsync(id, dto, cancellationToken);
-        return updated ? NoContent() : NotFound();
+        await _productService.UpdateAsync(id, dto, cancellationToken);
+        return NoContent();
     }
 
     // DELETE: api/product/5
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteProduct(int id, CancellationToken cancellationToken)
     {
-        var deleted = await _productService.DeleteAsync(id, cancellationToken);
-        return deleted ? NoContent() : NotFound();
+        await _productService.DeleteAsync(id, cancellationToken);
+        return NoContent();
     }
 }
