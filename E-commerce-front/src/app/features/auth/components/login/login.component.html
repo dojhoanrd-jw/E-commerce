@@ -1,0 +1,40 @@
+<div class="auth">
+  <aside class="auth__brand">
+    <div class="auth__brand-content">
+      <span class="auth__logo">● ShopHub</span>
+      <h1>Bienvenido de vuelta</h1>
+      <p>Inicia sesión para descubrir productos, gestionar tu tienda y comprar en un solo lugar.</p>
+    </div>
+  </aside>
+
+  <main class="auth__panel">
+    <form class="auth__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <h2>Iniciar sesión</h2>
+      <p class="auth__subtitle">Ingresa tus datos para continuar</p>
+
+      <label class="field">
+        <span>Correo electrónico</span>
+        <input type="email" formControlName="email" placeholder="tu@correo.com" autocomplete="email" />
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+          <small class="field__error">Ingresa un correo válido</small>
+        }
+      </label>
+
+      <label class="field">
+        <span>Contraseña</span>
+        <input type="password" formControlName="password" placeholder="••••••••" autocomplete="current-password" />
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <small class="field__error">La contraseña es obligatoria</small>
+        }
+      </label>
+
+      <button class="btn" type="submit" [disabled]="loading()">
+        {{ loading() ? 'Ingresando…' : 'Iniciar sesión' }}
+      </button>
+
+      <p class="auth__switch">
+        ¿No tienes cuenta? <a routerLink="/auth/register">Crear cuenta</a>
+      </p>
+    </form>
+  </main>
+</div>

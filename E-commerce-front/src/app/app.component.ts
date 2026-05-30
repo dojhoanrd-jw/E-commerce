@@ -7,11 +7,8 @@ import { ToastComponent } from '@shared/ui/toast/toast.component';
   standalone: true,
   imports: [RouterOutlet, ToastComponent],
   template: `
-    <h1>{{ title }}</h1>
     <app-toast />
     <router-outlet />
   `
 })
-export class AppComponent {
-  title = 'E-commerce';
-}
+export class AppComponent {}

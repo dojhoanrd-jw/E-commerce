@@ -1,0 +1,66 @@
+<div class="auth">
+  <aside class="auth__brand">
+    <div class="auth__brand-content">
+      <span class="auth__logo">● ShopHub</span>
+      <h1>Únete a la comunidad</h1>
+      <p>Crea tu cuenta como comprador o vendedor y empieza en minutos.</p>
+    </div>
+  </aside>
+
+  <main class="auth__panel">
+    <form class="auth__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <h2>Crear cuenta</h2>
+      <p class="auth__subtitle">Completa tus datos para empezar</p>
+
+      <label class="field">
+        <span>Nombre</span>
+        <input type="text" formControlName="name" placeholder="Tu nombre" autocomplete="name" />
+        @if (form.controls.name.touched && form.controls.name.invalid) {
+          <small class="field__error">El nombre es obligatorio</small>
+        }
+      </label>
+
+      <label class="field">
+        <span>Correo electrónico</span>
+        <input type="email" formControlName="email" placeholder="tu@correo.com" autocomplete="email" />
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+          <small class="field__error">Ingresa un correo válido</small>
+        }
+      </label>
+
+      <label class="field">
+        <span>Contraseña</span>
+        <input type="password" formControlName="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <small class="field__error">Mínimo 6 caracteres</small>
+        }
+      </label>
+
+      <span class="field"><span>Quiero registrarme como</span></span>
+      <div class="role-group">
+        <label class="role-option">
+          <input type="radio" formControlName="role" value="Buyer" />
+          <span class="role-option__box">
+            <strong>Comprador</strong>
+            <small>Explora y compra productos</small>
+          </span>
+        </label>
+        <label class="role-option">
+          <input type="radio" formControlName="role" value="Seller" />
+          <span class="role-option__box">
+            <strong>Vendedor</strong>
+            <small>Publica y vende productos</small>
+          </span>
+        </label>
+      </div>
+
+      <button class="btn" type="submit" [disabled]="loading()">
+        {{ loading() ? 'Creando cuenta…' : 'Crear cuenta' }}
+      </button>
+
+      <p class="auth__switch">
+        ¿Ya tienes cuenta? <a routerLink="/auth/login">Iniciar sesión</a>
+      </p>
+    </form>
+  </main>
+</div>
