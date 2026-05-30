@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProductsService } from '@features/products/services/products.service';
-import { PRODUCT_CATEGORIES } from '@features/products/models/product.model';
+import { PRODUCT_CATEGORIES, ProductPayload } from '@features/products/models/product.model';
 import { NotificationService } from '@core/services/notification.service';
 
 @Component({
@@ -27,9 +27,11 @@ export class ProductFormComponent implements OnInit {
     name: ['', [Validators.required, Validators.maxLength(255)]],
     description: [''],
     price: [0, [Validators.required, Validators.min(0)]],
+    salePrice: [0, [Validators.min(0)]],
     stock: [0, [Validators.required, Validators.min(0)]],
     category: ['Electrónica', [Validators.required]],
-    imageurl: ['', [Validators.required]]
+    imageurl: ['', [Validators.required]],
+    imagesText: ['']
   });
 
   ngOnInit(): void {
@@ -46,9 +48,11 @@ export class ProductFormComponent implements OnInit {
           name: p.name,
           description: p.description ?? '',
           price: p.price,
+          salePrice: p.salePrice ?? 0,
           stock: p.stock,
           category: p.category,
-          imageurl: p.imageurl
+          imageurl: p.imageurl,
+          imagesText: (p.images ?? []).join('\n')
         })
     });
   }
@@ -60,9 +64,25 @@ export class ProductFormComponent implements OnInit {
     }
 
     this.saving.set(true);
-    const payload = this.form.getRawValue();
-    const id = this.editId();
+    const raw = this.form.getRawValue();
 
+    const images = raw.imagesText
+      .split('\n')
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+
+    const payload: ProductPayload = {
+      name: raw.name,
+      description: raw.description,
+      price: raw.price,
+      salePrice: raw.salePrice && raw.salePrice > 0 ? raw.salePrice : null,
+      stock: raw.stock,
+      category: raw.category,
+      imageurl: raw.imageurl,
+      images
+    };
+
+    const id = this.editId();
     const request$: Observable<unknown> = id
       ? this.productsService.update(id, payload)
       : this.productsService.create(payload);

@@ -25,7 +25,7 @@ export class CartService {
         {
           productId: product.id,
           name: product.name,
-          price: product.price,
+          price: product.salePrice ?? product.price,
           imageurl: product.imageurl,
           quantity
         }

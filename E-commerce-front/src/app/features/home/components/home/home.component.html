@@ -37,6 +37,13 @@
       [ngModel]="maxPrice()"
       (ngModelChange)="maxPrice.set($event)"
     />
+    <select [ngModel]="sort()" (ngModelChange)="sort.set($event)">
+      <option value="relevance">Ordenar por…</option>
+      <option value="price-asc">Precio: menor a mayor</option>
+      <option value="price-desc">Precio: mayor a menor</option>
+      <option value="rating">Mejor calificados</option>
+      <option value="sales">Más vendidos</option>
+    </select>
     <button class="filters__clear" type="button" (click)="clearFilters()">Limpiar</button>
   </div>
 
@@ -56,14 +63,28 @@
           >♥</button>
           <a class="product-card__link" [routerLink]="['/products', product.id]">
             <div class="image-container">
+              @if (hasDiscount(product)) {
+                <span class="sale-badge">-{{ discountPercent(product) }}%</span>
+              }
               <img [src]="product.imageurl" [alt]="product.name" class="product-image" />
             </div>
             <div class="product-info">
               <span class="product-cat">{{ product.category }}</span>
               <h3 class="product-name">{{ product.name }}</h3>
+              @if (product.reviewCount > 0) {
+                <div class="card-rating">
+                  <span class="stars">{{ stars(product.averageRating) }}</span>
+                  <span>({{ product.reviewCount }})</span>
+                </div>
+              }
               <p class="product-description">{{ product.description }}</p>
               <div class="product-details">
-                <span class="price">{{ product.price | currency }}</span>
+                <span class="price">
+                  {{ effective(product) | currency }}
+                  @if (hasDiscount(product)) {
+                    <span class="price-old">{{ product.price | currency }}</span>
+                  }
+                </span>
                 <span class="stock">Stock: {{ product.stock }}</span>
               </div>
             </div>

@@ -12,10 +12,15 @@ export interface Product {
   name: string;
   description: string;
   price: number;
+  salePrice?: number | null;
   stock: number;
   imageurl: string;
+  images: string[];
   category: string;
   sellerId?: number | null;
+  averageRating: number;
+  reviewCount: number;
+  salesCount: number;
 }
 
 export interface ProductPayload {
@@ -23,6 +28,12 @@ export interface ProductPayload {
   description: string;
   stock: number;
   price: number;
+  salePrice?: number | null;
   imageurl: string;
+  images: string[];
   category: string;
+}
+
+export function effectivePrice(p: Product): number {
+  return p.salePrice ?? p.price;
 }

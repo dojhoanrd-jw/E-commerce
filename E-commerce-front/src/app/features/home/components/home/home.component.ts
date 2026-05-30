@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ProductsService } from '@features/products/services/products.service';
-import { Product, PRODUCT_CATEGORIES } from '@features/products/models/product.model';
+import { Product, PRODUCT_CATEGORIES, effectivePrice } from '@features/products/models/product.model';
 import { CartService } from '@core/services/cart.service';
 import { WishlistService } from '@core/services/wishlist.service';
 import { NotificationService } from '@core/services/notification.service';
@@ -28,24 +28,38 @@ export class HomeComponent implements OnInit {
   readonly search = signal('');
   readonly category = signal('');
   readonly maxPrice = signal<number | null>(null);
+  readonly sort = signal('relevance');
 
   readonly filtered = computed(() => {
     const term = this.search().trim().toLowerCase();
     const cat = this.category();
     const max = this.maxPrice();
 
-    return this.allProducts().filter((p) => {
+    const list = this.allProducts().filter((p) => {
       if (term && !p.name.toLowerCase().includes(term)) {
         return false;
       }
       if (cat && p.category !== cat) {
         return false;
       }
-      if (max != null && p.price > max) {
+      if (max != null && effectivePrice(p) > max) {
         return false;
       }
       return true;
     });
+
+    switch (this.sort()) {
+      case 'price-asc':
+        return [...list].sort((a, b) => effectivePrice(a) - effectivePrice(b));
+      case 'price-desc':
+        return [...list].sort((a, b) => effectivePrice(b) - effectivePrice(a));
+      case 'rating':
+        return [...list].sort((a, b) => b.averageRating - a.averageRating);
+      case 'sales':
+        return [...list].sort((a, b) => b.salesCount - a.salesCount);
+      default:
+        return list;
+    }
   });
 
   ngOnInit(): void {
@@ -74,5 +88,23 @@ export class HomeComponent implements OnInit {
     this.search.set('');
     this.category.set('');
     this.maxPrice.set(null);
+    this.sort.set('relevance');
+  }
+
+  effective(p: Product): number {
+    return effectivePrice(p);
+  }
+
+  hasDiscount(p: Product): boolean {
+    return p.salePrice != null && p.salePrice < p.price;
+  }
+
+  discountPercent(p: Product): number {
+    return p.salePrice != null ? Math.round((1 - p.salePrice / p.price) * 100) : 0;
+  }
+
+  stars(rating: number): string {
+    const r = Math.round(rating);
+    return '★'.repeat(r) + '☆'.repeat(5 - r);
   }
 }

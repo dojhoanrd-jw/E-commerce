@@ -28,6 +28,11 @@
     </div>
 
     <label class="field">
+      <span>Precio de oferta (opcional)</span>
+      <input type="number" min="0" step="0.01" formControlName="salePrice" placeholder="Déjalo en 0 si no hay oferta" />
+    </label>
+
+    <label class="field">
       <span>Categoría</span>
       <select formControlName="category">
         @for (c of categories; track c) {
@@ -37,11 +42,16 @@
     </label>
 
     <label class="field">
-      <span>URL de imagen</span>
+      <span>URL de imagen principal</span>
       <input type="text" formControlName="imageurl" placeholder="https://…" />
       @if (form.controls.imageurl.touched && form.controls.imageurl.invalid) {
         <small class="field__error">La imagen es obligatoria</small>
       }
+    </label>
+
+    <label class="field">
+      <span>Galería (una URL por línea, opcional)</span>
+      <textarea formControlName="imagesText" rows="3" placeholder="https://…&#10;https://…"></textarea>
     </label>
 
     <button class="btn" type="submit" [disabled]="saving()">

@@ -6,8 +6,24 @@
       <a class="back" routerLink="/">← Volver a la tienda</a>
 
       <div class="detail">
-        <div class="detail__image">
-          <img [src]="p.imageurl" [alt]="p.name" />
+        <div class="detail__gallery">
+          <div class="detail__image">
+            <img [src]="selectedImage()" [alt]="p.name" />
+          </div>
+          @if (gallery().length > 1) {
+            <div class="thumbs">
+              @for (img of gallery(); track img) {
+                <button
+                  class="thumb"
+                  [class.thumb--active]="selectedImage() === img"
+                  (click)="selectedImage.set(img)"
+                  type="button"
+                >
+                  <img [src]="img" [alt]="p.name" />
+                </button>
+              }
+            </div>
+          }
         </div>
 
         <div class="detail__info">
@@ -20,7 +36,12 @@
             </div>
           }
           <p class="detail__desc">{{ p.description }}</p>
-          <div class="detail__price">{{ p.price | currency }}</div>
+          <div class="detail__price">
+            {{ effective(p) | currency }}
+            @if (hasDiscount(p)) {
+              <span class="detail__price-old">{{ p.price | currency }}</span>
+            }
+          </div>
           <div class="detail__stock">Stock disponible: {{ p.stock }}</div>
 
           <div class="detail__actions">
@@ -92,6 +113,21 @@
           <p class="muted"><a routerLink="/auth/login">Inicia sesión</a> para dejar una reseña.</p>
         }
       </section>
+
+      @if (related().length > 0) {
+        <section class="related">
+          <h2>También te puede gustar</h2>
+          <div class="related__grid">
+            @for (r of related(); track r.id) {
+              <a class="related__card" [routerLink]="['/products', r.id]">
+                <img [src]="r.imageurl" [alt]="r.name" />
+                <span class="related__name">{{ r.name }}</span>
+                <span class="related__price">{{ effective(r) | currency }}</span>
+              </a>
+            }
+          </div>
+        </section>
+      }
     } @else {
       <p class="muted">Producto no encontrado.</p>
     }

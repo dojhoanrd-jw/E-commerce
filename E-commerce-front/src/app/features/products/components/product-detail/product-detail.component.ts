@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ProductsService } from '@features/products/services/products.service';
-import { Product } from '@features/products/models/product.model';
+import { Product, effectivePrice } from '@features/products/models/product.model';
 import { CartService } from '@core/services/cart.service';
 import { WishlistService } from '@core/services/wishlist.service';
 import { NotificationService } from '@core/services/notification.service';
@@ -30,6 +30,16 @@ export class ProductDetailComponent implements OnInit {
   readonly loading = signal(true);
   quantity = 1;
 
+  readonly selectedImage = signal<string>('');
+  readonly related = signal<Product[]>([]);
+  readonly gallery = computed(() => {
+    const p = this.product();
+    if (!p) {
+      return [] as string[];
+    }
+    return [p.imageurl, ...(p.images ?? [])].filter((url, i, arr) => url && arr.indexOf(url) === i);
+  });
+
   readonly reviews = signal<Review[]>([]);
   readonly isLoggedIn = this.auth.isAuthenticated;
   readonly average = computed(() => {
@@ -50,17 +60,36 @@ export class ProductDetailComponent implements OnInit {
     this.productsService.getById(id).subscribe({
       next: (p) => {
         this.product.set(p);
+        this.selectedImage.set(p.imageurl);
         this.loading.set(false);
+        this.loadRelated(p);
       },
       error: () => this.loading.set(false)
     });
     this.loadReviews(id);
   }
 
+  private loadRelated(product: Product): void {
+    this.productsService.getProduct().subscribe({
+      next: (all) =>
+        this.related.set(
+          all.filter((x) => x.category === product.category && x.id !== product.id).slice(0, 4)
+        )
+    });
+  }
+
   private loadReviews(productId: number): void {
     this.reviewService.getByProduct(productId).subscribe({
       next: (data) => this.reviews.set(data)
     });
+  }
+
+  effective(p: Product): number {
+    return effectivePrice(p);
+  }
+
+  hasDiscount(p: Product): boolean {
+    return p.salePrice != null && p.salePrice < p.price;
   }
 
   addToCart(): void {
