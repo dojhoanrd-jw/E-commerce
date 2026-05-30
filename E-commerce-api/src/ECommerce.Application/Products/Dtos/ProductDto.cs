@@ -12,9 +12,19 @@ public class ProductDto
 
     public decimal Price { get; set; }
 
+    public decimal? SalePrice { get; set; }
+
     public string? Imageurl { get; set; }
+
+    public List<string> Images { get; set; } = new();
 
     public string Category { get; set; } = null!;
 
     public int? SellerId { get; set; }
+
+    public double AverageRating { get; set; }
+
+    public int ReviewCount { get; set; }
+
+    public int SalesCount { get; set; }
 }

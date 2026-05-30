@@ -25,9 +25,14 @@ public class ProductService : IProductService
                 Description = p.Description,
                 Stock = p.Stock,
                 Price = p.Price,
+                SalePrice = p.SalePrice,
                 Imageurl = p.Imageurl,
+                Images = p.Images,
                 Category = p.Category,
-                SellerId = p.SellerId
+                SellerId = p.SellerId,
+                AverageRating = _context.Reviews.Where(r => r.ProductId == p.Id).Select(r => (double?)r.Rating).Average() ?? 0,
+                ReviewCount = _context.Reviews.Count(r => r.ProductId == p.Id),
+                SalesCount = _context.OrderItems.Where(oi => oi.ProductId == p.Id).Select(oi => (int?)oi.Quantity).Sum() ?? 0
             })
             .ToListAsync(cancellationToken);
     }
@@ -49,9 +54,14 @@ public class ProductService : IProductService
                 Description = p.Description,
                 Stock = p.Stock,
                 Price = p.Price,
+                SalePrice = p.SalePrice,
                 Imageurl = p.Imageurl,
+                Images = p.Images,
                 Category = p.Category,
-                SellerId = p.SellerId
+                SellerId = p.SellerId,
+                AverageRating = _context.Reviews.Where(r => r.ProductId == p.Id).Select(r => (double?)r.Rating).Average() ?? 0,
+                ReviewCount = _context.Reviews.Count(r => r.ProductId == p.Id),
+                SalesCount = _context.OrderItems.Where(oi => oi.ProductId == p.Id).Select(oi => (int?)oi.Quantity).Sum() ?? 0
             })
             .ToListAsync(cancellationToken);
     }
@@ -64,7 +74,9 @@ public class ProductService : IProductService
             Description = dto.Description,
             Stock = dto.Stock,
             Price = dto.Price,
+            SalePrice = dto.SalePrice,
             Imageurl = dto.Imageurl,
+            Images = dto.Images,
             Category = dto.Category,
             SellerId = sellerId
         };
@@ -84,7 +96,9 @@ public class ProductService : IProductService
         product.Description = dto.Description;
         product.Stock = dto.Stock;
         product.Price = dto.Price;
+        product.SalePrice = dto.SalePrice;
         product.Imageurl = dto.Imageurl;
+        product.Images = dto.Images;
         product.Category = dto.Category;
 
         await _context.SaveChangesAsync(cancellationToken);
@@ -120,7 +134,9 @@ public class ProductService : IProductService
         Description = p.Description,
         Stock = p.Stock,
         Price = p.Price,
+        SalePrice = p.SalePrice,
         Imageurl = p.Imageurl,
+        Images = p.Images,
         Category = p.Category,
         SellerId = p.SellerId
     };

@@ -12,7 +12,11 @@ public class Product
 
     public decimal Price { get; set; }
 
+    public decimal? SalePrice { get; set; }
+
     public string? Imageurl { get; set; }
+
+    public List<string> Images { get; set; } = new();
 
     public string Category { get; set; } = "Otros";
 

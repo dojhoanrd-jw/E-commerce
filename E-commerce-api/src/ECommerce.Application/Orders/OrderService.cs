@@ -84,7 +84,7 @@ public class OrderService : IOrderService
             {
                 ProductId = product.Id,
                 ProductName = product.Name,
-                UnitPrice = product.Price,
+                UnitPrice = product.SalePrice ?? product.Price,
                 Quantity = quantity
             });
         }

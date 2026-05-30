@@ -16,7 +16,12 @@ public class UpdateProductDto
     [Range(0, double.MaxValue)]
     public decimal Price { get; set; }
 
+    [Range(0, double.MaxValue)]
+    public decimal? SalePrice { get; set; }
+
     public string? Imageurl { get; set; }
+
+    public List<string> Images { get; set; } = new();
 
     [Required]
     [MaxLength(50)]
